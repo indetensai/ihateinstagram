@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"os"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
@@ -24,15 +27,30 @@ func error_check(err error, status string) {
 	}
 }
 
-/*func register_handler(fiber.Ctx) {
+func register_handler(c *fiber.Ctx) error {
 	id := uuid.New()
 	hash := sha256.New()
-	hash.Write([]byte(r.FormValue("password")))
+	hash.Write([]byte(c.FormValue("password")))
 	pede := hash.Sum(nil)
 	var exists bool
 	letter := new(register_result)
-	err := con.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM app_user WHERE username=$1)", r.FormValue("username")).Scan(&exists)
-}*/
+	err := con.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM app_user WHERE username=$1)", c.FormValue("username")).Scan(&exists)
+	error_check(err, "existence check failed")
+	if exists || (c.FormValue("username") == "" || c.FormValue("password") == "") {
+		letter.Success = false
+		letter.Note = "username already exists or username or password blank"
+
+	} else if !exists {
+		letter.Success = true
+		letter.Note = ""
+		_, err := con.Exec(context.Background(), "INSERT INTO app_user (user_id,username,password) VALUES ($1,$2,$3)", id, c.FormValue("username"), fmt.Sprintf("%x", pede))
+		error_check(err, "inserting new user credentials failed")
+	}
+	j, err := json.Marshal(letter)
+	error_check(err, "response writing failed")
+	c.Write(j)
+	return err
+}
 
 func baza() {
 	var err error
@@ -50,6 +68,6 @@ func main() {
 	godotenv.Load(".env")
 	baza()
 	app := fiber.New()
-	//app.Post("/register")
-
+	app.Post("/user/register", register_handler)
+	app.Listen(":8080")
 }
