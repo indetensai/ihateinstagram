@@ -11,13 +11,13 @@ import (
 func check_session(c *fiber.Ctx) *uuid.UUID {
 	session_id := c.Query("session_id")
 	if session_id == "" {
-		c.Status(fiber.StatusUnauthorized)
+		c.SendStatus(fiber.StatusUnauthorized)
 		return nil
 	}
 	user_id := new(uuid.UUID)
 	err := con.QueryRow(c.Context(), "SELECT user_id FROM session WHERE session_id=$1", session_id).Scan(user_id)
 	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+		c.SendStatus(fiber.StatusBadRequest)
 		return nil
 	}
 	return user_id
@@ -46,10 +46,7 @@ func login_handler(c *fiber.Ctx) error {
 	var id uuid.UUID
 	err = tx.QueryRow(c.Context(), "SELECT password,user_id FROM app_user WHERE username=$1", c.FormValue("username")).Scan(&b, &id)
 	if err != nil {
-		fmt.Println(err)
-		c.Write([]byte("username not found"))
-		c.Status(fiber.StatusNotFound)
-		return err
+		return c.SendStatus(fiber.StatusNotFound)
 	}
 
 	error_check(err, "scanning failed")

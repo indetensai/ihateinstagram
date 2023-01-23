@@ -13,5 +13,6 @@ func main() {
 	app.Post("/user/login", login_handler)
 	app.Delete("/session/:id<guid>", delete_session)
 	app.Post("/post", post_handler)
+	app.Put("/post/:post_id<guid>/image", image_handler)
 	app.Listen(":8080")
 }
