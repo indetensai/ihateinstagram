@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -14,11 +13,6 @@ import (
 )
 
 var con *pgx.Conn
-
-type register_result struct {
-	Success bool   `json:"success"`
-	Note    string `json:"note,omitempty"`
-}
 
 func error_check(err error, status string) {
 	if err != nil {
@@ -33,7 +27,6 @@ func login_handler(c *fiber.Ctx) error {
 	pede := hash.Sum(nil)
 	var b string
 	var id uuid.UUID
-	letter := new(register_result)
 	err := con.QueryRow(context.Background(), "SELECT password,user_id FROM app_user WHERE username=$1", c.FormValue("username")).Scan(&b, &id)
 	if err != nil {
 		fmt.Println(err)
@@ -45,58 +38,57 @@ func login_handler(c *fiber.Ctx) error {
 	error_check(err, "scanning failed")
 
 	if b == fmt.Sprintf("%x", pede) {
-		letter.Success = true
-		letter.Note = "sucessfull login!! congratz."
 		_, err := con.Exec(context.Background(), "INSERT INTO session (user_id) VALUES ($1)", id)
-		error_check(err, "creating session failed")
-		j, err := json.Marshal(letter)
-		error_check(err, "response writing failed")
-		c.Write(j)
-		c.Status(fiber.StatusOK)
+		if err != nil {
+			return err
+		}
+
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"success": true,
+			"note":    "sucessfull login!! congratz.",
+		})
 	} else {
-		letter.Success = false
-		letter.Note = "password is wrong, ure brainless"
-		j, err := json.Marshal(letter)
 		error_check(err, "response writing failed")
-		c.Write(j)
-		c.Status(fiber.StatusNonAuthoritativeInformation)
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"success": false,
+			"note":    "password is wrong, ure brainless",
+		})
 	}
-	return err
 }
 
 func register_handler(c *fiber.Ctx) error {
-	id := uuid.New()
 	hash := sha256.New()
 	hash.Write([]byte(c.FormValue("password")))
 	pede := hash.Sum(nil)
 	var exists bool
-	letter := new(register_result)
 	err := con.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM app_user WHERE username=$1)", c.FormValue("username")).Scan(&exists)
 	error_check(err, "existence check failed")
 	if exists || (c.FormValue("username") == "" || c.FormValue("password") == "") {
-		letter.Success = false
-		letter.Note = "username already exists or username or password blank"
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"success": false,
+			"note":    "username already exists or username or password blank",
+		})
 
-	} else if !exists {
-		letter.Success = true
-		letter.Note = ""
-		_, err := con.Exec(context.Background(), "INSERT INTO app_user (user_id,username,password) VALUES ($1,$2,$3)", id, c.FormValue("username"), fmt.Sprintf("%x", pede))
-		error_check(err, "inserting new user credentials failed")
+	} else {
+		_, err := con.Exec(context.Background(), "INSERT INTO app_user (username,password) VALUES ($1,$2)", c.FormValue("username"), fmt.Sprintf("%x", pede))
+		if err != nil {
+			return err
+		}
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"success": true,
+			"note":    "",
+		})
 	}
-	j, err := json.Marshal(letter)
-	error_check(err, "response writing failed")
-	c.Write(j)
-	return err
 }
 
-func baza() {
+func based() {
 	var err error
 	con, err = pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	error_check(err, "connection to database failed")
 	con.Ping(context.Background())
 	con.Exec(context.Background(),
 		`CREATE TABLE IF NOT EXISTS app_user(
-		user_id uuid PRIMARY KEY,
+		user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 		username VARCHAR(50) UNIQUE NOT NULL,
 		password VARCHAR(64) NOT NULL
 		);`)
@@ -109,7 +101,7 @@ func baza() {
 }
 func main() {
 	godotenv.Load(".env")
-	baza()
+	based()
 	app := fiber.New()
 	app.Post("/user/register", register_handler)
 	app.Post("/user/login", login_handler)
