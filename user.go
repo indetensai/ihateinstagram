@@ -8,6 +8,21 @@ import (
 	"github.com/google/uuid"
 )
 
+func check_session(c *fiber.Ctx) *uuid.UUID {
+	session_id := c.Query("session_id")
+	if session_id == "" {
+		c.Status(fiber.StatusUnauthorized)
+		return nil
+	}
+	user_id := new(uuid.UUID)
+	err := con.QueryRow(c.Context(), "SELECT user_id FROM session WHERE session_id=$1", session_id).Scan(user_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return nil
+	}
+	return user_id
+}
+
 func delete_session(c *fiber.Ctx) error {
 	_, err := con.Exec(c.Context(), "DELETE FROM session WHERE session_id=$1", c.Params("id"))
 	if err != nil {
@@ -45,7 +60,7 @@ func login_handler(c *fiber.Ctx) error {
 			return err
 		}
 		var session_id string
-		err = tx.QueryRow(c.Context(), "SELECT session_id FROM session ORDER BY created_at DESC ").Scan(&session_id)
+		err = tx.QueryRow(c.Context(), "SELECT session_id FROM session ORDER BY created_at DESC").Scan(&session_id)
 		if err != nil {
 			return err
 		}

@@ -12,5 +12,6 @@ func main() {
 	app.Post("/user/register", register_handler)
 	app.Post("/user/login", login_handler)
 	app.Delete("/session/:id<guid>", delete_session)
+	app.Post("/post", post_handler)
 	app.Listen(":8080")
 }
