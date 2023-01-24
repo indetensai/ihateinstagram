@@ -25,12 +25,20 @@ func post_handler(c *fiber.Ctx) error {
 		return err
 	}
 	defer tx.Rollback(c.Context())
-	_, err = tx.Exec(c.Context(), "INSERT INTO post (user_id,description) VALUES ($1,$2)", user_id, c.FormValue("description"))
+	_, err = tx.Exec(
+		c.Context(),
+		"INSERT INTO post (user_id,description) VALUES ($1,$2)",
+		user_id,
+		c.FormValue("description"),
+	)
 	if err != nil {
 		return err
 	}
 	var session_id uuid.UUID
-	err = tx.QueryRow(c.Context(), "SELECT post_id FROM post ORDER BY created_at DESC").Scan(&session_id)
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT post_id FROM post ORDER BY created_at DESC",
+	).Scan(&session_id)
 	if err != nil {
 		return err
 	}
@@ -54,7 +62,11 @@ func image_handler(c *fiber.Ctx) error {
 	defer tx.Rollback(c.Context())
 	post_id := c.Params("post_id")
 	var check uuid.UUID
-	err = tx.QueryRow(c.Context(), "SELECT user_id FROM post WHERE post_id=$1", post_id).Scan(&check)
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT user_id FROM post WHERE post_id=$1",
+		post_id,
+	).Scan(&check)
 	if err != nil {
 		return err
 	}
@@ -69,7 +81,13 @@ func image_handler(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(c.Context(), "INSERT INTO image (user_id,post_id,content) VALUES ($1,$2,$3)", user_id, post_id, image)
+	_, err = tx.Exec(
+		c.Context(),
+		"INSERT INTO image (user_id,post_id,content) VALUES ($1,$2,$3)",
+		user_id,
+		post_id,
+		image,
+	)
 	if err != nil {
 		return err
 	}
@@ -85,7 +103,16 @@ func getting_post_handler(c *fiber.Ctx) error {
 		return err
 	}
 	defer tx.Rollback(c.Context())
-	err = tx.QueryRow(c.Context(), "SELECT user_id,description,vision,created_at FROM post WHERE post_id=$1", post_id).Scan(&post.owner_id, &post.description, &post.visibility, &post.created_at)
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT user_id,description,vision,created_at FROM post WHERE post_id=$1",
+		post_id,
+	).Scan(
+		&post.owner_id,
+		&post.description,
+		&post.visibility,
+		&post.created_at,
+	)
 	if err != nil {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -99,14 +126,25 @@ func getting_post_handler(c *fiber.Ctx) error {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		_, err = tx.Exec(c.Context(), "SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2", user_id, post.owner_id)
+		_, err = tx.Exec(
+			c.Context(),
+			"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
+			user_id,
+			post.owner_id,
+		)
 		if err != nil && *user_id != post.owner_id {
 			return c.SendStatus(fiber.StatusUnauthorized)
 		}
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"post_owner_id": post.owner_id,
-		"visibility":  post.visibility,
-		"created_at":  post.created_at,
-		"description": post.description})
+
+	tx.Commit(c.Context())
+	return c.Status(fiber.StatusOK).JSON(
+		fiber.Map{
+			"post_owner_id": post.owner_id,
+			"visibility":    post.visibility,
+			"created_at":    post.created_at,
+			"description":   post.description,
+		},
+	)
 
 }

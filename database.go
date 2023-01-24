@@ -22,7 +22,9 @@ func database_connection() {
 	con, err = pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	error_check(err, "connection to database failed")
 	con.Ping(context.Background())
-	con.Exec(context.Background(), "CREATE TYPE visibility AS ENUM ('public', 'followers', 'private');")
+	con.Exec(context.Background(),
+		"CREATE TYPE visibility AS ENUM ('public', 'followers', 'private');",
+	)
 	con.Exec(context.Background(),
 		`CREATE TABLE IF NOT EXISTS app_user(
 		user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

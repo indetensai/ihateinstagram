@@ -11,7 +11,7 @@ func main() {
 	app := fiber.New()
 	app.Post("/user/register", register_handler)
 	app.Post("/user/login", login_handler)
-	app.Delete("/session/:id<guid>", delete_session)
+	app.Delete("/session/:id<guid>", delete_session_handler)
 	app.Post("/post", post_handler)
 	app.Put("/post/:post_id<guid>/image", image_handler)
 	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", follow_handler)

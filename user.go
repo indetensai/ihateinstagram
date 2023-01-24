@@ -15,7 +15,11 @@ func check_session(c *fiber.Ctx) *uuid.UUID {
 		return nil
 	}
 	user_id := new(uuid.UUID)
-	err := con.QueryRow(c.Context(), "SELECT user_id FROM session WHERE session_id=$1", session_id).Scan(user_id)
+	err := con.QueryRow(
+		c.Context(),
+		"SELECT user_id FROM session WHERE session_id=$1",
+		session_id,
+	).Scan(user_id)
 	if err != nil {
 		c.SendStatus(fiber.StatusBadRequest)
 		return nil
@@ -23,8 +27,12 @@ func check_session(c *fiber.Ctx) *uuid.UUID {
 	return user_id
 }
 
-func delete_session(c *fiber.Ctx) error {
-	_, err := con.Exec(c.Context(), "DELETE FROM session WHERE session_id=$1", c.Params("id"))
+func delete_session_handler(c *fiber.Ctx) error {
+	_, err := con.Exec(
+		c.Context(),
+		"DELETE FROM session WHERE session_id=$1",
+		c.Params("id"),
+	)
 	if err != nil {
 		return err
 	} else {
@@ -44,7 +52,11 @@ func login_handler(c *fiber.Ctx) error {
 	pede := hash.Sum(nil)
 	var b string
 	var id uuid.UUID
-	err = tx.QueryRow(c.Context(), "SELECT password,user_id FROM app_user WHERE username=$1", c.FormValue("username")).Scan(&b, &id)
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT password,user_id FROM app_user WHERE username=$1",
+		c.FormValue("username"),
+	).Scan(&b, &id)
 	if err != nil {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
@@ -52,12 +64,19 @@ func login_handler(c *fiber.Ctx) error {
 	error_check(err, "scanning failed")
 
 	if b == fmt.Sprintf("%x", pede) {
-		_, err := tx.Exec(c.Context(), "INSERT INTO session (user_id) VALUES ($1)", id)
+		_, err := tx.Exec(
+			c.Context(),
+			"INSERT INTO session (user_id) VALUES ($1)",
+			id,
+		)
 		if err != nil {
 			return err
 		}
 		var session_id string
-		err = tx.QueryRow(c.Context(), "SELECT session_id FROM session ORDER BY created_at DESC").Scan(&session_id)
+		err = tx.QueryRow(
+			c.Context(),
+			"SELECT session_id FROM session ORDER BY created_at DESC",
+		).Scan(&session_id)
 		if err != nil {
 			return err
 		}
@@ -87,7 +106,11 @@ func register_handler(c *fiber.Ctx) error {
 	hash.Write([]byte(c.FormValue("password")))
 	pede := hash.Sum(nil)
 	var exists bool
-	err = tx.QueryRow(c.Context(), "SELECT EXISTS(SELECT 1 FROM app_user WHERE username=$1)", c.FormValue("username")).Scan(&exists)
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT EXISTS(SELECT 1 FROM app_user WHERE username=$1)",
+		c.FormValue("username"),
+	).Scan(&exists)
 	error_check(err, "existence check failed")
 	if exists || (c.FormValue("username") == "" || c.FormValue("password") == "") {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -95,7 +118,12 @@ func register_handler(c *fiber.Ctx) error {
 		})
 
 	} else {
-		_, err := tx.Exec(c.Context(), "INSERT INTO app_user (username,password) VALUES ($1,$2)", c.FormValue("username"), fmt.Sprintf("%x", pede))
+		_, err := tx.Exec(
+			c.Context(),
+			"INSERT INTO app_user (username,password) VALUES ($1,$2)",
+			c.FormValue("username"),
+			fmt.Sprintf("%x", pede),
+		)
 		if err != nil {
 			return err
 		}
