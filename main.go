@@ -17,5 +17,6 @@ func main() {
 	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", follow_handler)
 	app.Delete("/user/:user_id<guid>/followers/:follower_id<guid>", unfollow_handler)
 	app.Get("/user/:user_id<guid>/followers", followers_handler)
+	app.Get("/post/:post_id<guid>", getting_post_handler)
 	app.Listen(":8080")
 }

@@ -2,10 +2,18 @@ package main
 
 import (
 	b64 "encoding/base64"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
+
+type post struct {
+	owner_id    uuid.UUID
+	description string
+	visibility  string
+	created_at  time.Time
+}
 
 func post_handler(c *fiber.Ctx) error {
 	user_id := check_session(c)
@@ -67,4 +75,38 @@ func image_handler(c *fiber.Ctx) error {
 	}
 	tx.Commit(c.Context())
 	return c.SendStatus(fiber.StatusOK)
+}
+func getting_post_handler(c *fiber.Ctx) error {
+	post := new(post)
+	user_id := check_session(c)
+	post_id := c.Params("post_id")
+	tx, err := con.Begin(c.Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Context())
+	err = tx.QueryRow(c.Context(), "SELECT user_id,description,vision,created_at FROM post WHERE post_id=$1", post_id).Scan(&post.owner_id, &post.description, &post.visibility, &post.created_at)
+	if err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+	if post.visibility == "private" {
+		if user_id == nil || *user_id != post.owner_id {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+	}
+	if post.visibility == "followers" {
+		if user_id != nil {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+
+		_, err = tx.Exec(c.Context(), "SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2", user_id, post.owner_id)
+		if err != nil && *user_id != post.owner_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"post_owner_id": post.owner_id,
+		"visibility":  post.visibility,
+		"created_at":  post.created_at,
+		"description": post.description})
+
 }
