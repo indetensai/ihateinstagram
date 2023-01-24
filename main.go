@@ -14,5 +14,6 @@ func main() {
 	app.Delete("/session/:id<guid>", delete_session)
 	app.Post("/post", post_handler)
 	app.Put("/post/:post_id<guid>/image", image_handler)
+	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", follow_handler)
 	app.Listen(":8080")
 }

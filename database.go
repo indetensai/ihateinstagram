@@ -50,4 +50,12 @@ func database_connection() {
 		post_id UUID REFERENCES post(post_id) ON DELETE SET NULL,
 		content BYTEA 
 		);`)
+	con.Exec(context.Background(),
+		`CREATE TABLE IF NOT EXISTS following(
+		follower_id UUID PRIMARY KEY NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
+		user_id UUID REFERENCES app_user(user_id) ON DELETE CASCADE,
+		following_since TIMESTAMP NOT NULL DEFAULT now(),
+		UNIQUE (user_id,follower_id),
+		CHECK (user_id!=follower_id)
+		);`)
 }
