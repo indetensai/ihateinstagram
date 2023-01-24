@@ -37,3 +37,21 @@ func unfollow_handler(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
+func followers_handler(c *fiber.Ctx) error {
+	user_id := uuid.Must(uuid.Parse(c.Params("user_id")))
+	rows, err := con.Query(c.Context(), "SELECT follower_id FROM following WHERE user_id=$1", user_id)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	defer rows.Close()
+	var rowslice []uuid.UUID
+	for rows.Next() {
+		var r uuid.UUID
+		err = rows.Scan(&r)
+		if err != nil {
+			return err
+		}
+		rowslice = append(rowslice, r)
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"followers": rowslice})
+}
