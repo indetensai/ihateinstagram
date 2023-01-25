@@ -21,5 +21,6 @@ func main() {
 	app.Patch("/post/:post_id<guid>", post_changing_handler)
 	app.Put("/post/:post_id<guid>/like", like_handler)
 	app.Get("/post/:post_id<guid>/likes", get_likes_handler)
+	app.Delete("/post/:post_id<guid>/like", unlike_handler)
 	app.Listen(":8080")
 }

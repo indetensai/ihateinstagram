@@ -288,3 +288,17 @@ func get_likes_handler(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"liked_by": likes})
 }
+func unlike_handler(c *fiber.Ctx) error {
+	user_id := check_session(c)
+	post_id := c.Params("post_id")
+	_, err := con.Exec(
+		c.Context(),
+		"DELETE FROM liking WHERE user_id=$1 AND post_id=$2",
+		user_id,
+		post_id,
+	)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
