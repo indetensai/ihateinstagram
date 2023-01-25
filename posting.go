@@ -150,6 +150,9 @@ func getting_post_handler(c *fiber.Ctx) error {
 
 func post_changing_handler(c *fiber.Ctx) error {
 	user_id := check_session(c)
+	if user_id == nil {
+		return nil
+	}
 	received_post := new(post)
 	post_id := c.Params("post_id")
 	tx, err := con.Begin(c.Context())
@@ -195,6 +198,37 @@ func post_changing_handler(c *fiber.Ctx) error {
 		if err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
+	}
+	tx.Commit(c.Context())
+	return c.SendStatus(fiber.StatusOK)
+}
+func like_handler(c *fiber.Ctx) error {
+	tx, err := con.Begin(c.Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Context())
+	user_id := check_session(c)
+	if user_id == nil {
+		return nil
+	}
+	post_id := c.Params("post_id")
+	_, err = tx.Exec(
+		c.Context(),
+		"SELECT 1 FROM post WHERE post_id=$1",
+		post_id,
+	)
+	if err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+	_, err = tx.Exec(
+		c.Context(),
+		"INSERT INTO liking (user_id,post_id) VALUES ($1,$2)",
+		user_id,
+		post_id,
+	)
+	if err != nil {
+		return c.SendStatus(fiber.StatusConflict)
 	}
 	tx.Commit(c.Context())
 	return c.SendStatus(fiber.StatusOK)

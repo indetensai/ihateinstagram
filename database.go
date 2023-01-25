@@ -60,4 +60,12 @@ func database_connection() {
 		UNIQUE (user_id,follower_id),
 		CHECK (user_id!=follower_id)
 		);`)
+	con.Exec(context.Background(),
+		`CREATE TABLE IF NOT EXISTS liking(
+		user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
+		post_id UUID NOT NULL REFERENCES post(post_id) ON DELETE CASCADE,
+		created_at TIMESTAMP NOT NULL DEFAULT now(),
+		PRIMARY KEY (user_id,post_id),
+		UNIQUE (user_id,post_id)
+		);`)
 }
