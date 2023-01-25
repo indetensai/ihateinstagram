@@ -233,3 +233,58 @@ func like_handler(c *fiber.Ctx) error {
 	tx.Commit(c.Context())
 	return c.SendStatus(fiber.StatusOK)
 }
+func get_likes_handler(c *fiber.Ctx) error {
+	tx, err := con.Begin(c.Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Context())
+	user_id := check_session(c)
+	post_id := c.Params("post_id")
+	var visibility string
+	var owner_id uuid.UUID
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT vision,user_id FROM post WHERE post_id=$1",
+		post_id,
+	).Scan(&visibility, &owner_id)
+	if err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+	if visibility != "public" && user_id == nil {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+	if visibility == "private" && owner_id != *user_id {
+		return c.SendStatus(fiber.StatusForbidden)
+	}
+	if visibility == "followers" && owner_id != *user_id {
+		_, err = tx.Exec(
+			c.Context(),
+			"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
+			user_id,
+			owner_id,
+		)
+		if err != nil {
+			return c.SendStatus(fiber.StatusForbidden)
+		}
+	}
+	rows, err := tx.Query(
+		c.Context(),
+		"SELECT user_id FROM liking WHERE post_id=$1",
+		post_id,
+	)
+	if err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+	defer rows.Close()
+	var likes []uuid.UUID
+	for rows.Next() {
+		var u uuid.UUID
+		err = rows.Scan(&u)
+		if err != nil {
+			return err
+		}
+		likes = append(likes, u)
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"liked_by": likes})
+}

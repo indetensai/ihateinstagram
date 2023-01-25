@@ -20,5 +20,6 @@ func main() {
 	app.Get("/post/:post_id<guid>", getting_post_handler)
 	app.Patch("/post/:post_id<guid>", post_changing_handler)
 	app.Put("/post/:post_id<guid>/like", like_handler)
+	app.Get("/post/:post_id<guid>/likes", get_likes_handler)
 	app.Listen(":8080")
 }
