@@ -146,5 +146,56 @@ func getting_post_handler(c *fiber.Ctx) error {
 			"description":   post.description,
 		},
 	)
+}
 
+func post_changing_handler(c *fiber.Ctx) error {
+	user_id := check_session(c)
+	received_post := new(post)
+	post_id := c.Params("post_id")
+	tx, err := con.Begin(c.Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Context())
+	err = tx.QueryRow(
+		c.Context(),
+		"SELECT user_id,description,vision,created_at FROM post WHERE post_id=$1",
+		post_id,
+	).Scan(
+		&received_post.owner_id,
+		&received_post.description,
+		&received_post.visibility,
+		&received_post.created_at,
+	)
+	if *user_id != received_post.owner_id {
+		c.SendStatus(fiber.StatusUnauthorized)
+	}
+	changes := struct {
+		Visibility  string `json:"visibility"`
+		Description string `json:"description"`
+	}{}
+	check := *received_post
+	if err := c.BodyParser(&changes); err != nil {
+		return err
+	}
+	if changes.Description != check.description && changes.Description != "" {
+		check.description = changes.Description
+	}
+	if changes.Visibility != check.visibility && changes.Visibility != "" {
+		check.visibility = changes.Visibility
+	}
+	if check != *received_post {
+		_, err = tx.Exec(
+			c.Context(),
+			"UPDATE post SET vision=$1,description=$2 WHERE post_id=$3",
+			check.visibility,
+			check.description,
+			post_id,
+		)
+		if err != nil {
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+	}
+	tx.Commit(c.Context())
+	return c.SendStatus(fiber.StatusOK)
 }
