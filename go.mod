@@ -1,4 +1,4 @@
-module zhopa
+module phota
 
 go 1.19
 
