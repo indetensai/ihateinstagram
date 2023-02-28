@@ -33,7 +33,7 @@ func (u *userService) CheckSession(session_id string, ctx context.Context) (*uui
 	if session_id == "" {
 		return nil, entities.ErrEmptySession
 	}
-	user_id := new(uuid.UUID)
+	var user_id *uuid.UUID
 	err := u.db.QueryRow(
 		ctx,
 		"SELECT user_id FROM session WHERE session_id=$1",

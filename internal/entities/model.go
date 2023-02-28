@@ -55,7 +55,7 @@ type UserService interface {
 }
 
 type PostingService interface {
-	Post(*fiber.Ctx) error
+	Post(session_id string, ctx context.Context, desription string) error
 	Image(*fiber.Ctx) error
 	GettingPost(*fiber.Ctx) error
 	PostChanging(*fiber.Ctx) error
