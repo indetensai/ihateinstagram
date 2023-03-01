@@ -57,10 +57,10 @@ func (u *userService) DeleteSession(session_id string, ctx context.Context) erro
 	return nil
 }
 
-func (u *userService) Login(username string, password string, ctx context.Context) error {
+func (u *userService) Login(username string, password string, ctx context.Context) (*string, error) {
 	tx, err := u.db.Begin(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback(ctx)
 	var result entities.AppUser
@@ -70,15 +70,15 @@ func (u *userService) Login(username string, password string, ctx context.Contex
 		username,
 	).Scan(&result)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
 	if err != nil {
-		return entities.ErrInvalidCredentials
+		return nil, entities.ErrInvalidCredentials
 	}
 	session_id, err := GenerateRandomString(64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_, err = tx.Exec(
 		ctx,
@@ -86,13 +86,13 @@ func (u *userService) Login(username string, password string, ctx context.Contex
 		session_id, result.UserID,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &session_id, nil
 }
 
 func (u *userService) Register(username string, password string, ctx context.Context) error {
