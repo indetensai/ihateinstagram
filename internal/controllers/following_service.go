@@ -31,3 +31,33 @@ func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
+func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
+	session_id := c.FormValue("session_id")
+	user_id, err := uuid.Parse(c.Params("user_id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	follower_id, err := uuid.Parse(c.Params("follower_id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	err = f.FollowingService.Unfollow(follower_id, user_id, session_id, c.Context())
+	if err == entities.ErrNotAuthorized {
+		c.SendStatus(fiber.StatusUnauthorized)
+	}
+	if err != nil {
+		c.SendStatus(fiber.StatusInternalServerError)
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+func (f *FollowingServiceHandler) GetFollowersHandler(c *fiber.Ctx) error {
+	user_id, err := uuid.Parse(c.Params("user_id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	followers, err := f.FollowingService.GetFollowers(user_id, c.Context())
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"followers": *followers})
+}
