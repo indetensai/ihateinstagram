@@ -15,6 +15,7 @@ func NewFollowingServiceHandler(c *fiber.App, f entities.FollowingService) {
 	handler := &FollowingServiceHandler{f}
 	c.Put("/user/:user_id<guid>/followers/:follower_id<guid>", handler.FollowHandler)
 }
+
 func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	session_id := c.FormValue("session_id")
 	user_id, err := uuid.Parse(c.Params("user_id"))

@@ -13,8 +13,8 @@ type UserServiceHandler struct {
 func NewUserServiceHandler(c *fiber.App, u entities.UserService) {
 	handler := &UserServiceHandler{u}
 	c.Post("/user/register", handler.RegisterHandler)
-	//c.Post("/user/login", LoginHandler)
-	//c.Delete("/session/:id<guid>", DeleteSessionHandler)
+	c.Post("/user/login", handler.LoginHandler)
+	c.Delete("/session/:id<guid>", handler.DeleteSessionHandler)
 }
 
 func (u *UserServiceHandler) RegisterHandler(c *fiber.Ctx) error {
