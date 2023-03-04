@@ -30,7 +30,7 @@ func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	}
 	err = f.FollowingService.Follow(follower_id, user_id, session_id, c.Context())
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -45,11 +45,8 @@ func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 	err = f.FollowingService.Unfollow(follower_id, user_id, session_id, c.Context())
-	if err == entities.ErrNotAuthorized {
-		c.SendStatus(fiber.StatusUnauthorized)
-	}
 	if err != nil {
-		c.SendStatus(fiber.StatusInternalServerError)
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -60,7 +57,7 @@ func (f *FollowingServiceHandler) GetFollowersHandler(c *fiber.Ctx) error {
 	}
 	followers, err := f.FollowingService.GetFollowers(user_id, c.Context())
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return error_handling(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"followers": *followers})
 }

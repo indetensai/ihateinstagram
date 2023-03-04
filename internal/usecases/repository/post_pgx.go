@@ -29,7 +29,7 @@ func (p *PostRepository) Post(user_id uuid.UUID, ctx context.Context, desription
 		desription,
 	)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrDuplicate
 	}
 	var post_id uuid.UUID
 	err = tx.QueryRow(
@@ -37,7 +37,7 @@ func (p *PostRepository) Post(user_id uuid.UUID, ctx context.Context, desription
 		"SELECT post_id FROM post ORDER BY created_at DESC",
 	).Scan(&post_id)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
@@ -61,7 +61,7 @@ func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx 
 		&post.PostID, &post.UserID, &post.Description, &post.Visibility, &post.CreatedAt,
 	)
 	if err != nil {
-		return nil, entities.ErrPostNotFound
+		return nil, entities.ErrNotFound
 	}
 	if post.Visibility == "private" {
 		if user_id == nil || *user_id != post.UserID {
@@ -114,6 +114,9 @@ func (p *PostRepository) PostChanging(
 		&received_post.Visibility,
 		&received_post.CreatedAt,
 	)
+	if err != nil {
+		return err
+	}
 	if *user_id != received_post.UserID {
 		return entities.ErrNotAuthorized
 	}
@@ -155,7 +158,7 @@ func (p *PostRepository) Like(user_id *uuid.UUID, post_id uuid.UUID, ctx context
 		post_id,
 	)
 	if err != nil {
-		return err
+		return entities.ErrNotFound
 	}
 	_, err = tx.Exec(
 		ctx,
@@ -164,7 +167,7 @@ func (p *PostRepository) Like(user_id *uuid.UUID, post_id uuid.UUID, ctx context
 		post_id,
 	)
 	if err != nil {
-		return err
+		return entities.ErrDuplicate
 	}
 	tx.Commit(ctx)
 	if err != nil {
@@ -191,7 +194,7 @@ func (p *PostRepository) GetLikes(
 		post_id,
 	).Scan(&visibility, &owner_id)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	_, err = tx.Exec(
 		ctx,
@@ -200,7 +203,7 @@ func (p *PostRepository) GetLikes(
 		owner_id,
 	)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	rows, err := tx.Query(
 		ctx,
@@ -208,7 +211,7 @@ func (p *PostRepository) GetLikes(
 		post_id,
 	)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	defer rows.Close()
 	var likes []uuid.UUID

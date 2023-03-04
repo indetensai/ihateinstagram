@@ -41,7 +41,7 @@ func (u *UserRepository) CheckSession(session_id string, ctx context.Context) (*
 		session_id,
 	).Scan(&user_id)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	return &user_id, nil
 }
@@ -71,7 +71,7 @@ func (u *UserRepository) Login(username string, password string, ctx context.Con
 		username,
 	).Scan(&result.UserID, &result.Name, &result.Password)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
 	if err != nil {
@@ -87,7 +87,7 @@ func (u *UserRepository) Login(username string, password string, ctx context.Con
 		session_id, result.UserID,
 	)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrDuplicate
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
@@ -114,10 +114,10 @@ func (u *UserRepository) Register(username string, password string, ctx context.
 		username,
 	).Scan(&exists)
 	if err != nil {
-		return err
+		return entities.ErrNotFound
 	}
 	if exists || (username == "" || password == "") {
-		return entities.ErrUserAlreadyExists
+		return entities.ErrDuplicate
 
 	} else {
 		_, err := tx.Exec(
@@ -127,7 +127,7 @@ func (u *UserRepository) Register(username string, password string, ctx context.
 			string(password_hashed),
 		)
 		if err != nil {
-			return err
+			return entities.ErrDuplicate
 		}
 		tx.Commit(ctx)
 		return nil

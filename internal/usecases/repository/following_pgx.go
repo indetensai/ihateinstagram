@@ -28,7 +28,7 @@ func (f *FollowingRepository) Follow(
 		user_id,
 	)
 	if err != nil {
-		return err
+		return entities.ErrDuplicate
 	}
 	return nil
 }
@@ -57,7 +57,7 @@ func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUI
 		user_id,
 	)
 	if err != nil {
-		return nil, err
+		return nil, entities.ErrNotFound
 	}
 	defer rows.Close()
 	var followers []uuid.UUID

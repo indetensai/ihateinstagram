@@ -31,16 +31,10 @@ func (u *UserServiceHandler) RegisterHandler(c *fiber.Ctx) error {
 		})
 	}
 	err := u.UserService.Register(username, password, c.Context())
-	switch err {
-	case entities.ErrUserAlreadyExists:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"note": "user already exists",
-		})
-	case nil:
-		return c.SendStatus(fiber.StatusOK)
-	default:
-		return err
+	if err != nil {
+		return error_handling(c, err)
 	}
+	return nil
 }
 func (u *UserServiceHandler) LoginHandler(c *fiber.Ctx) error {
 	username := c.FormValue("username")
@@ -56,11 +50,8 @@ func (u *UserServiceHandler) LoginHandler(c *fiber.Ctx) error {
 		})
 	}
 	session_id, err := u.UserService.Login(username, password, c.Context())
-	if err == entities.ErrInvalidCredentials {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return error_handling(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"session_id": session_id})
 }
@@ -68,7 +59,7 @@ func (u *UserServiceHandler) DeleteSessionHandler(c *fiber.Ctx) error {
 	session_id := c.FormValue("session_id")
 	err := u.UserService.DeleteSession(session_id, c.Context())
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }

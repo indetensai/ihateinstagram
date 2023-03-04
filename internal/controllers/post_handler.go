@@ -26,7 +26,7 @@ func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
 	description := c.FormValue("description")
 	post_id, err := p.PostService.Post(session_id, c.Context(), description)
 	if err != nil {
-		return err
+		return error_handling(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"post_id": post_id})
 }
@@ -39,8 +39,8 @@ func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 		return err
 	}
 	post, err := p.PostService.GettingPost(post_id, session_id, c.Context())
-	if err != nil || post == nil {
-		return err
+	if err != nil {
+		return error_handling(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"description": post.Description,
@@ -61,7 +61,7 @@ func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	}
 	err = p.PostService.PostChanging(visibility, description, post_id, session_id, c.Context())
 	if err != nil {
-		return err
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -75,7 +75,7 @@ func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
 	}
 	err = p.PostService.Like(post_id, session_id, c.Context())
 	if err != nil {
-		return err
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -89,7 +89,7 @@ func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 	}
 	likes, err := p.PostService.GetLikes(session_id, post_id, c.Context())
 	if err != nil {
-		return err
+		return error_handling(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"likes": likes})
 }
@@ -103,7 +103,7 @@ func (p *PostServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 	}
 	err = p.PostService.Unlike(session_id, post_id, c.Context())
 	if err != nil {
-		return err
+		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
