@@ -25,3 +25,10 @@ type UserService interface {
 	Login(username string, password string, ctx context.Context) (*string, error)
 	Register(username string, password string, ctx context.Context) error
 }
+
+type UserRepository interface {
+	CheckSession(session_id string, ctx context.Context) (*uuid.UUID, error)
+	DeleteSession(session_id string, ctx context.Context) error
+	Login(username string, password string, ctx context.Context) (*string, error)
+	Register(username string, password string, ctx context.Context) error
+}
