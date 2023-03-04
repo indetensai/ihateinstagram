@@ -3,14 +3,17 @@ package usecases
 import (
 	"context"
 	"phota/internal/entities"
-	"phota/internal/usecases/repository"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 type followingService struct {
-	db *pgx.Conn
+	repo         entities.FollowingRepository
+	user_service entities.UserService
+}
+
+func NewFollowingService(f entities.FollowingRepository, u entities.UserService) entities.FollowingService {
+	return &followingService{f, u}
 }
 
 func (f *followingService) Follow(
@@ -18,16 +21,14 @@ func (f *followingService) Follow(
 	user_id uuid.UUID,
 	session_id string,
 	ctx context.Context) error {
-	var user_service userService
-	session_follower_id, err := user_service.CheckSession(session_id, ctx)
+	session_follower_id, err := f.user_service.CheckSession(session_id, ctx)
 	if err != nil {
 		return err
 	}
 	if follower_id != *session_follower_id {
 		return entities.ErrNotAuthorized
 	}
-	following_repository := repository.NewFollowingRepository(f.db)
-	err = following_repository.Follow(ctx, follower_id, user_id)
+	err = f.repo.Follow(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -38,16 +39,14 @@ func (f *followingService) Unfollow(
 	user_id uuid.UUID,
 	session_id string,
 	ctx context.Context) error {
-	var user_service userService
-	session_follower_id, err := user_service.CheckSession(session_id, ctx)
+	session_follower_id, err := f.user_service.CheckSession(session_id, ctx)
 	if err != nil {
 		return err
 	}
 	if follower_id != *session_follower_id {
 		return entities.ErrNotAuthorized
 	}
-	following_repository := repository.NewFollowingRepository(f.db)
-	err = following_repository.Unfollow(ctx, follower_id, user_id)
+	err = f.repo.Unfollow(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -57,8 +56,7 @@ func (f *followingService) GetFollowers(
 	user_id uuid.UUID,
 	ctx context.Context,
 ) (*[]uuid.UUID, error) {
-	following_repository := repository.NewFollowingRepository(f.db)
-	followers, err := following_repository.GetFollowers(ctx, user_id)
+	followers, err := f.repo.GetFollowers(ctx, user_id)
 	if err != nil {
 		return nil, err
 	}

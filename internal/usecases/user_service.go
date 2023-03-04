@@ -3,22 +3,23 @@ package usecases
 import (
 	"context"
 	"phota/internal/entities"
-	"phota/internal/usecases/repository"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 type userService struct {
-	db *pgx.Conn
+	repo entities.UserRepository
+}
+
+func NewUserService(u entities.UserRepository) entities.UserService {
+	return &userService{u}
 }
 
 func (u *userService) CheckSession(session_id string, ctx context.Context) (*uuid.UUID, error) {
 	if session_id == "" {
 		return nil, entities.ErrEmptySession
 	}
-	user_repository := repository.NewUserRepository(u.db)
-	user_id, err := user_repository.CheckSession(session_id, ctx)
+	user_id, err := u.repo.CheckSession(session_id, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -26,14 +27,12 @@ func (u *userService) CheckSession(session_id string, ctx context.Context) (*uui
 }
 
 func (u *userService) DeleteSession(session_id string, ctx context.Context) error {
-	user_repository := repository.NewUserRepository(u.db)
-	err := user_repository.DeleteSession(session_id, ctx)
+	err := u.repo.DeleteSession(session_id, ctx)
 	return err
 }
 
 func (u *userService) Login(username string, password string, ctx context.Context) (*string, error) {
-	user_repository := repository.NewUserRepository(u.db)
-	session_id, err := user_repository.Login(username, password, ctx)
+	session_id, err := u.repo.Login(username, password, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +41,6 @@ func (u *userService) Login(username string, password string, ctx context.Contex
 }
 
 func (u *userService) Register(username string, password string, ctx context.Context) error {
-	user_repository := repository.NewUserRepository(u.db)
-	err := user_repository.Register(username, password, ctx)
+	err := u.repo.Register(username, password, ctx)
 	return err
 }

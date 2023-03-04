@@ -31,7 +31,7 @@ func (p *PostRepository) Post(user_id uuid.UUID, ctx context.Context, desription
 	if err != nil {
 		return nil, err
 	}
-	var post_id *uuid.UUID
+	var post_id uuid.UUID
 	err = tx.QueryRow(
 		ctx,
 		"SELECT post_id FROM post ORDER BY created_at DESC",
@@ -43,11 +43,11 @@ func (p *PostRepository) Post(user_id uuid.UUID, ctx context.Context, desription
 	if err != nil {
 		return nil, err
 	}
-	return post_id, nil
+	return &post_id, nil
 }
 
 func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*entities.Post, error) {
-	post := new(entities.Post)
+	var post entities.Post
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx 
 		"SELECT * FROM post WHERE post_id=$1",
 		post_id,
 	).Scan(
-		&post,
+		&post.PostID, &post.UserID, &post.Description, &post.Visibility, &post.CreatedAt,
 	)
 	if err != nil {
 		return nil, entities.ErrPostNotFound
@@ -88,7 +88,7 @@ func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx 
 	if err != nil {
 		return nil, err
 	}
-	return post, nil
+	return &post, nil
 }
 
 func (p *PostRepository) PostChanging(
@@ -97,7 +97,7 @@ func (p *PostRepository) PostChanging(
 	description string,
 	post_id uuid.UUID,
 	ctx context.Context) error {
-	received_post := new(entities.Post)
+	var received_post entities.Post
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -108,19 +108,23 @@ func (p *PostRepository) PostChanging(
 		"SELECT * FROM post WHERE post_id=$1",
 		post_id,
 	).Scan(
-		&received_post,
+		&received_post.PostID,
+		&received_post.UserID,
+		&received_post.Description,
+		&received_post.Visibility,
+		&received_post.CreatedAt,
 	)
 	if *user_id != received_post.UserID {
 		return entities.ErrNotAuthorized
 	}
-	check := *received_post
+	check := received_post
 	if description != check.Description && description != "" {
 		check.Description = description
 	}
 	if check.Visibility != visibility && visibility != "" {
 		check.Visibility = visibility
 	}
-	if check != *received_post {
+	if check != received_post {
 		_, err = tx.Exec(
 			ctx,
 			"UPDATE post SET vision=$1,description=$2 WHERE post_id=$3",

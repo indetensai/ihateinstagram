@@ -34,16 +34,16 @@ func GenerateRandomString(n int) (string, error) {
 }
 
 func (u *UserRepository) CheckSession(session_id string, ctx context.Context) (*uuid.UUID, error) {
-	var user_id *uuid.UUID
+	var user_id uuid.UUID
 	err := u.db.QueryRow(
 		ctx,
 		"SELECT user_id FROM session WHERE session_id=$1",
 		session_id,
-	).Scan(user_id)
+	).Scan(&user_id)
 	if err != nil {
 		return nil, err
 	}
-	return user_id, nil
+	return &user_id, nil
 }
 
 func (u *UserRepository) DeleteSession(session_id string, ctx context.Context) error {
@@ -69,7 +69,7 @@ func (u *UserRepository) Login(username string, password string, ctx context.Con
 		ctx,
 		"SELECT * FROM app_user WHERE username=$1",
 		username,
-	).Scan(&result)
+	).Scan(&result.UserID, &result.Name, &result.Password)
 	if err != nil {
 		return nil, err
 	}
