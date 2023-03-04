@@ -7,10 +7,10 @@ import (
 )
 
 type PostServiceHandler struct {
-	PostService entities.PostingService
+	PostService entities.PostService
 }
 
-func NewPostServiceHandler(c *fiber.App, p entities.PostingService) PostServiceHandler {
+func NewPostServiceHandler(c *fiber.App, p entities.PostService) PostServiceHandler {
 	handler := &PostServiceHandler{p}
 }
 
@@ -18,5 +18,5 @@ func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
 	session_id := c.FormValue("session_id")
 	description := c.FormValue("description")
 	post_id, err := p.PostService.Post(session_id, c.Context(), description)
-	
+
 }
