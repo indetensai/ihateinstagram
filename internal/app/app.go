@@ -10,12 +10,22 @@ import (
 	"phota/internal/usecases/repository"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
 
 func Run() {
 	godotenv.Load(".env")
+	m, err := migrate.New("file://../sql", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Up(); err != nil {
+		log.Fatal(err)
+	}
 	con, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Print(err)
@@ -26,6 +36,7 @@ func Run() {
 		fmt.Print(err)
 		log.Fatal("baza caput")
 	}
+
 	app := fiber.New()
 
 	user_repository := repository.NewUserRepository(con)
