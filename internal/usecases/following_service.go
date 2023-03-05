@@ -19,16 +19,8 @@ func NewFollowingService(f entities.FollowingRepository, u entities.UserService)
 func (f *followingService) Follow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
-	session_id string,
 	ctx context.Context) error {
-	session_follower_id, err := f.user_service.CheckSession(session_id, ctx)
-	if err != nil {
-		return err
-	}
-	if follower_id != *session_follower_id {
-		return entities.ErrNotAuthorized
-	}
-	err = f.repo.Follow(ctx, follower_id, user_id)
+	err := f.repo.Follow(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -37,21 +29,14 @@ func (f *followingService) Follow(
 func (f *followingService) Unfollow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
-	session_id string,
 	ctx context.Context) error {
-	session_follower_id, err := f.user_service.CheckSession(session_id, ctx)
-	if err != nil {
-		return err
-	}
-	if follower_id != *session_follower_id {
-		return entities.ErrNotAuthorized
-	}
-	err = f.repo.Unfollow(ctx, follower_id, user_id)
+	err := f.repo.Unfollow(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 func (f *followingService) GetFollowers(
 	user_id uuid.UUID,
 	ctx context.Context,
@@ -61,4 +46,13 @@ func (f *followingService) GetFollowers(
 		return nil, err
 	}
 	return &followers, nil
+}
+
+func (f *followingService) IsFollowing(
+	user_id uuid.UUID,
+	follower_id uuid.UUID,
+	ctx context.Context,
+) bool {
+	check := f.repo.IsFollowing(user_id, follower_id, ctx)
+	return check
 }

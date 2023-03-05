@@ -19,7 +19,6 @@ func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
 }
 
 func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
-	session_id := c.FormValue("session_id")
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -28,14 +27,13 @@ func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	err = f.FollowingService.Follow(follower_id, user_id, session_id, c.Context())
+	err = f.FollowingService.Follow(follower_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
 func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
-	session_id := c.FormValue("session_id")
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -44,7 +42,7 @@ func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	err = f.FollowingService.Unfollow(follower_id, user_id, session_id, c.Context())
+	err = f.FollowingService.Unfollow(follower_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}

@@ -22,9 +22,12 @@ func NewPostServiceHandler(app *fiber.App, p entities.PostService) {
 }
 
 func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
-	session_id := c.FormValue("session_id")
 	description := c.FormValue("description")
-	post_id, err := p.PostService.Post(session_id, c.Context(), description)
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
+	post_id, err := p.PostService.Post(user_id, c.Context(), description)
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -33,12 +36,15 @@ func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
 
 func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
-	session_id := c.FormValue("session_id")
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
 	}
-	post, err := p.PostService.GettingPost(post_id, session_id, c.Context())
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -54,12 +60,15 @@ func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	visibility := c.FormValue("visibility")
 	description := c.FormValue("description")
 	post_id_raw := c.Params("post_id")
-	session_id := c.FormValue("session_id")
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
 	}
-	err = p.PostService.PostChanging(visibility, description, post_id, session_id, c.Context())
+	err = p.PostService.PostChanging(visibility, description, post_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -68,12 +77,15 @@ func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 
 func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
-	session_id := c.FormValue("session_id")
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
 	}
-	err = p.PostService.Like(post_id, session_id, c.Context())
+	err = p.PostService.Like(post_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -82,12 +94,15 @@ func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
 
 func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
-	session_id := c.FormValue("session_id")
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
 	}
-	likes, err := p.PostService.GetLikes(session_id, post_id, c.Context())
+	likes, err := p.PostService.GetLikes(user_id, post_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -96,12 +111,15 @@ func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 
 func (p *PostServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
-	session_id := c.FormValue("session_id")
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	if user_id == nil {
+		return entities.ErrNotAuthorized
+	}
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
 	}
-	err = p.PostService.Unlike(session_id, post_id, c.Context())
+	err = p.PostService.Unlike(user_id, post_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}

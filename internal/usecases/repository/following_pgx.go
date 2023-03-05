@@ -71,3 +71,20 @@ func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUI
 	}
 	return followers, nil
 }
+
+func (f *FollowingRepository) IsFollowing(
+	user_id uuid.UUID,
+	follower_id uuid.UUID,
+	ctx context.Context,
+) bool {
+	_, err := f.db.Exec(
+		ctx,
+		"SELECT EXISTS (SELECT 1 FROM following WHERE user_id=$1 AND follower_id=$2)",
+		user_id,
+		follower_id,
+	)
+	if err != nil {
+		return false
+	}
+	return true
+}
