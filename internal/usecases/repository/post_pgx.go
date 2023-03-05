@@ -63,27 +63,15 @@ func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx 
 	if err != nil {
 		return nil, entities.ErrNotFound
 	}
-	if post.Visibility == "private" {
-		if user_id == nil || *user_id != post.UserID {
-			return nil, entities.ErrNotAuthorized
-		}
+	_, err = tx.Exec(
+		ctx,
+		"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
+		user_id,
+		post.UserID,
+	)
+	if err != nil {
+		return nil, err
 	}
-	if post.Visibility == "followers" {
-		if user_id == nil {
-			return nil, entities.ErrNotAuthorized
-		}
-
-		_, err = tx.Exec(
-			ctx,
-			"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
-			user_id,
-			post.UserID,
-		)
-		if err != nil || *user_id != post.UserID {
-			return nil, err
-		}
-	}
-
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
@@ -186,25 +174,6 @@ func (p *PostRepository) GetLikes(
 		return nil, err
 	}
 	defer tx.Rollback(ctx)
-	var visibility string
-	var owner_id uuid.UUID
-	err = tx.QueryRow(
-		ctx,
-		"SELECT vision,user_id FROM post WHERE post_id=$1",
-		post_id,
-	).Scan(&visibility, &owner_id)
-	if err != nil {
-		return nil, entities.ErrNotFound
-	}
-	_, err = tx.Exec(
-		ctx,
-		"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
-		*user_id,
-		owner_id,
-	)
-	if err != nil {
-		return nil, entities.ErrNotFound
-	}
 	rows, err := tx.Query(
 		ctx,
 		"SELECT user_id FROM liking WHERE post_id=$1",

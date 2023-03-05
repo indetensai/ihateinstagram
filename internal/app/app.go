@@ -55,7 +55,7 @@ func Run() {
 
 	post_repository := repository.NewPostRepository(con)
 	post_service := usecases.NewPostService(post_repository, user_service)
-	controllers.NewPostServiceHandler(app, post_service)
+	controllers.NewPostServiceHandler(app, post_service, following_service)
 
 	app.Listen(":8080")
 }

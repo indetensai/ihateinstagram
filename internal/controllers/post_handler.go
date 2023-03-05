@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"phota/internal/entities"
 
 	"github.com/gofiber/fiber/v2"
@@ -8,11 +10,17 @@ import (
 )
 
 type PostServiceHandler struct {
-	PostService entities.PostService
+	PostService      entities.PostService
+	FollowingService entities.FollowingService
 }
 
-func NewPostServiceHandler(app *fiber.App, p entities.PostService) {
-	handler := PostServiceHandler{p}
+type decoding struct {
+	Visibility  string
+	Description string
+}
+
+func NewPostServiceHandler(app *fiber.App, p entities.PostService, f entities.FollowingService) {
+	handler := PostServiceHandler{p, f}
 	app.Post("/post", handler.PostHandler)
 	app.Get("/post/:post_id<guid>", handler.GettingPostHandler)
 	app.Patch("/post/:post_id<guid>", handler.PostChangingHandler)
@@ -48,6 +56,16 @@ func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return error_handling(c, err)
 	}
+	switch post.Visibility {
+	case "followers":
+		if !p.FollowingService.IsFollowing(post.UserID, *user_id, c.Context()) || post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	case "private":
+		if post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"description": post.Description,
 		"created at":  post.CreatedAt,
@@ -57,8 +75,14 @@ func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 }
 
 func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
-	visibility := c.FormValue("visibility")
-	description := c.FormValue("description")
+	decoder := json.NewDecoder(bytes.NewReader(c.Body()))
+	var result decoding
+	err := decoder.Decode(&result)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+	visibility := result.Visibility
+	description := result.Description
 	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
@@ -67,6 +91,13 @@ func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
+	}
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	if post.UserID != *user_id {
+		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	err = p.PostService.PostChanging(visibility, description, post_id, user_id, c.Context())
 	if err != nil {
@@ -85,6 +116,20 @@ func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	switch post.Visibility {
+	case "followers":
+		if !p.FollowingService.IsFollowing(post.UserID, *user_id, c.Context()) || post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	case "private":
+		if post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	}
 	err = p.PostService.Like(post_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
@@ -102,6 +147,20 @@ func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	switch post.Visibility {
+	case "followers":
+		if !p.FollowingService.IsFollowing(post.UserID, *user_id, c.Context()) || post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	case "private":
+		if post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	}
 	likes, err := p.PostService.GetLikes(user_id, post_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
@@ -118,6 +177,20 @@ func (p *PostServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
+	}
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	switch post.Visibility {
+	case "followers":
+		if !p.FollowingService.IsFollowing(post.UserID, *user_id, c.Context()) || post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
+	case "private":
+		if post.UserID != *user_id {
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
 	}
 	err = p.PostService.Unlike(user_id, post_id, c.Context())
 	if err != nil {
