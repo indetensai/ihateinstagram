@@ -32,6 +32,7 @@ func (p *postService) GettingPost(
 	}
 	return post, nil
 }
+
 func (p *postService) PostChanging(
 	visibility string,
 	description string,
@@ -42,19 +43,26 @@ func (p *postService) PostChanging(
 	err := p.repo.PostChanging(user_id, visibility, description, post_id, ctx)
 	return err
 }
+
 func (p *postService) Like(post_id uuid.UUID, user_id *uuid.UUID, ctx context.Context) error {
 	err := p.repo.Like(user_id, post_id, ctx)
 	return err
 }
+
 func (p *postService) GetLikes(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*[]uuid.UUID, error) {
 	likes, err := p.repo.GetLikes(user_id, post_id, ctx)
 	if err != nil {
 		return nil, err
 	}
 	return likes, nil
-
 }
+
 func (p *postService) Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error {
 	err := p.repo.Unlike(user_id, post_id, ctx)
+	return err
+}
+
+func (p *postService) DeletePost(post_id uuid.UUID, ctx context.Context) error {
+	err := p.repo.DeletePost(post_id, ctx)
 	return err
 }

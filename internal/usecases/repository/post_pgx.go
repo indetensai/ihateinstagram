@@ -195,3 +195,12 @@ func (p *PostRepository) Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx conte
 	)
 	return err
 }
+
+func (p *PostRepository) DeletePost(post_id uuid.UUID, ctx context.Context) error {
+	_, err := p.db.Exec(
+		ctx,
+		"DELETE FROM post WHERE post_id=$1",
+		post_id,
+	)
+	return err
+}

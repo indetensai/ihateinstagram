@@ -27,6 +27,7 @@ func NewPostServiceHandler(app *fiber.App, p entities.PostService, f entities.Fo
 	app.Put("/post/:post_id<guid>/like", handler.LikeHandler)
 	app.Get("/post/:post_id<guid>/likes", handler.GetLikesHandler)
 	app.Delete("/post/:post_id<guid>/like", handler.UnlikeHandler)
+	app.Delete("/post/:post_id<guid>", handler.DeletePostHandler)
 }
 
 func (p *postServiceHandler) PostHandler(c *fiber.Ctx) error {
@@ -83,11 +84,11 @@ func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	}
 	visibility := result.Visibility
 	description := result.Description
-	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
 		return entities.ErrNotAuthorized
 	}
+	post_id_raw := c.Params("post_id")
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
@@ -193,6 +194,27 @@ func (p *postServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 		}
 	}
 	err = p.PostService.Unlike(user_id, post_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (p *postServiceHandler) DeletePostHandler(c *fiber.Ctx) error {
+	user_id, _ := c.Locals("user_id").(*uuid.UUID)
+	post_id_raw := c.Params("post_id")
+	post_id, err := uuid.Parse(post_id_raw)
+	if err != nil {
+		return err
+	}
+	post, err := p.PostService.GettingPost(post_id, user_id, c.Context())
+	if err != nil {
+		return error_handling(c, err)
+	}
+	if post.UserID != *user_id {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+	err = p.PostService.DeletePost(post_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}

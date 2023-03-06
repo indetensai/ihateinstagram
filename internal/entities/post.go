@@ -33,6 +33,7 @@ type PostService interface {
 	Like(post_id uuid.UUID, user_id *uuid.UUID, ctx context.Context) error
 	GetLikes(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*[]uuid.UUID, error)
 	Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
+	DeletePost(post_id uuid.UUID, ctx context.Context) error
 }
 
 type PostRepository interface {
@@ -47,4 +48,5 @@ type PostRepository interface {
 	Like(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
 	GetLikes(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*[]uuid.UUID, error)
 	Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
+	DeletePost(post_id uuid.UUID, ctx context.Context) error
 }
