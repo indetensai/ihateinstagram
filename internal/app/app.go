@@ -57,5 +57,9 @@ func Run() {
 	post_service := usecases.NewPostService(post_repository, user_service)
 	controllers.NewPostServiceHandler(app, post_service, following_service)
 
+	image_repository := repository.NewImageRepository(con)
+	image_service := usecases.NewImageService(image_repository)
+	controllers.NewImageServiceHandler(app, image_service, post_service)
+
 	app.Listen(":8080")
 }

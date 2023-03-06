@@ -6,18 +6,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserServiceHandler struct {
+type userServiceHandler struct {
 	UserService entities.UserService
 }
 
 func NewUserServiceHandler(app *fiber.App, u entities.UserService) {
-	handler := &UserServiceHandler{u}
+	handler := &userServiceHandler{u}
 	app.Post("/user/register", handler.RegisterHandler)
 	app.Post("/user/login", handler.LoginHandler)
 	app.Delete("/session/:id<guid>", handler.DeleteSessionHandler)
 }
 
-func (u *UserServiceHandler) RegisterHandler(c *fiber.Ctx) error {
+func (u *userServiceHandler) RegisterHandler(c *fiber.Ctx) error {
 	username := c.FormValue("username")
 	if username == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -36,7 +36,7 @@ func (u *UserServiceHandler) RegisterHandler(c *fiber.Ctx) error {
 	}
 	return nil
 }
-func (u *UserServiceHandler) LoginHandler(c *fiber.Ctx) error {
+func (u *userServiceHandler) LoginHandler(c *fiber.Ctx) error {
 	username := c.FormValue("username")
 	if username == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -55,7 +55,7 @@ func (u *UserServiceHandler) LoginHandler(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"session_id": session_id})
 }
-func (u *UserServiceHandler) DeleteSessionHandler(c *fiber.Ctx) error {
+func (u *userServiceHandler) DeleteSessionHandler(c *fiber.Ctx) error {
 	session_id := c.FormValue("session_id")
 	err := u.UserService.DeleteSession(session_id, c.Context())
 	if err != nil {

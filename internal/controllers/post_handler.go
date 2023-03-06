@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type PostServiceHandler struct {
+type postServiceHandler struct {
 	PostService      entities.PostService
 	FollowingService entities.FollowingService
 }
@@ -20,7 +20,7 @@ type decoding struct {
 }
 
 func NewPostServiceHandler(app *fiber.App, p entities.PostService, f entities.FollowingService) {
-	handler := PostServiceHandler{p, f}
+	handler := postServiceHandler{p, f}
 	app.Post("/post", handler.PostHandler)
 	app.Get("/post/:post_id<guid>", handler.GettingPostHandler)
 	app.Patch("/post/:post_id<guid>", handler.PostChangingHandler)
@@ -29,7 +29,7 @@ func NewPostServiceHandler(app *fiber.App, p entities.PostService, f entities.Fo
 	app.Delete("/post/:post_id<guid>/like", handler.UnlikeHandler)
 }
 
-func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) PostHandler(c *fiber.Ctx) error {
 	description := c.FormValue("description")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
@@ -42,7 +42,7 @@ func (p *PostServiceHandler) PostHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"post_id": post_id})
 }
 
-func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
@@ -74,7 +74,7 @@ func (p *PostServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 	})
 }
 
-func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	decoder := json.NewDecoder(bytes.NewReader(c.Body()))
 	var result decoding
 	err := decoder.Decode(&result)
@@ -106,7 +106,7 @@ func (p *PostServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) LikeHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
@@ -137,7 +137,7 @@ func (p *PostServiceHandler) LikeHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {
@@ -168,7 +168,7 @@ func (p *PostServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"likes": likes})
 }
 
-func (p *PostServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
+func (p *postServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 	post_id_raw := c.Params("post_id")
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	if user_id == nil {

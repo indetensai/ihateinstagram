@@ -15,13 +15,6 @@ type Post struct {
 	CreatedAt   time.Time
 }
 
-type Image struct {
-	ImageID uuid.UUID
-	UserID  uuid.UUID
-	PostID  uuid.UUID
-	Picture []byte
-}
-
 type Like struct {
 	UserID  uuid.UUID
 	PostID  uuid.UUID

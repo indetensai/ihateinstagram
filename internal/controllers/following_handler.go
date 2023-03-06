@@ -7,18 +7,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type FollowingServiceHandler struct {
+type followingServiceHandler struct {
 	FollowingService entities.FollowingService
 }
 
 func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
-	handler := &FollowingServiceHandler{f}
+	handler := &followingServiceHandler{f}
 	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", handler.FollowHandler)
 	app.Delete("/user/:user_id<guid>/followers/:follower_id<guid>", handler.UnfollowHandler)
 	app.Get("/user/:user_id<guid>/followers", handler.GetFollowersHandler)
 }
 
-func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
+func (f *followingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -33,7 +33,7 @@ func (f *FollowingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
-func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
+func (f *followingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -48,7 +48,7 @@ func (f *FollowingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
-func (f *FollowingServiceHandler) GetFollowersHandler(c *fiber.Ctx) error {
+func (f *followingServiceHandler) GetFollowersHandler(c *fiber.Ctx) error {
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
