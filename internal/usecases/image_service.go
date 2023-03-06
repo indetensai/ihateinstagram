@@ -54,3 +54,19 @@ func (i *imageService) UploadImage(
 	}
 	return nil
 }
+
+func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID) (*[][]byte, error) {
+	images, err := i.repo.GetImages(ctx, post_id)
+	if err != nil {
+		return nil, err
+	}
+	return &images, nil
+}
+
+func (i *imageService) GetThumbnails(ctx context.Context, post_id uuid.UUID) (*[][]byte, error) {
+	thumbnails, err := i.repo.GetThumbnails(ctx, post_id)
+	if err != nil {
+		return nil, err
+	}
+	return &thumbnails, nil
+}

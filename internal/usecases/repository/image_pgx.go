@@ -36,3 +36,53 @@ func (i *imageRepository) UploadImage(
 	}
 	return nil
 }
+
+func (i *imageRepository) GetImages(
+	ctx context.Context,
+	post_id uuid.UUID,
+) ([][]byte, error) {
+	rows, err := i.db.Query(
+		ctx,
+		"SELECT content FROM image WHERE post_id=$1",
+		post_id,
+	)
+	if err != nil {
+		return nil, entities.ErrNotFound
+	}
+	defer rows.Close()
+	var images [][]byte
+	for rows.Next() {
+		var i []byte
+		err = rows.Scan(&i)
+		if err != nil {
+			return nil, err
+		}
+		images = append(images, i)
+	}
+	return images, nil
+}
+
+func (i *imageRepository) GetThumbnails(
+	ctx context.Context,
+	post_id uuid.UUID,
+) ([][]byte, error) {
+	rows, err := i.db.Query(
+		ctx,
+		"SELECT thumbnail FROM image WHERE post_id=$1",
+		post_id,
+	)
+	if err != nil {
+		return nil, entities.ErrNotFound
+	}
+	defer rows.Close()
+	var thumbnails [][]byte
+	for rows.Next() {
+		var i []byte
+		err = rows.Scan(&i)
+		if err != nil {
+			return nil, err
+		}
+		thumbnails = append(thumbnails, i)
+	}
+	return thumbnails, nil
+}

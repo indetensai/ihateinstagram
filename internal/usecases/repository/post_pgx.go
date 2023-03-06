@@ -63,15 +63,6 @@ func (p *PostRepository) GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx 
 	if err != nil {
 		return nil, entities.ErrNotFound
 	}
-	_, err = tx.Exec(
-		ctx,
-		"SELECT 1 FROM following WHERE follower_id=$1 AND user_id=$2",
-		user_id,
-		post.UserID,
-	)
-	if err != nil {
-		return nil, err
-	}
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
