@@ -202,5 +202,13 @@ func (p *PostRepository) DeletePost(post_id uuid.UUID, ctx context.Context) erro
 		"DELETE FROM post WHERE post_id=$1",
 		post_id,
 	)
+	if err != nil {
+		return err
+	}
+	_, err = p.db.Exec(
+		ctx,
+		"DELETE FROM image WHERE post_id=$1",
+		post_id,
+	)
 	return err
 }
