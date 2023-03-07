@@ -21,7 +21,7 @@ import (
 
 func Run() {
 	godotenv.Load(".env")
-	m, err := migrate.New("file://../sql", os.Getenv("DATABASE_URL"))
+	m, err := migrate.New("file://sql", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
