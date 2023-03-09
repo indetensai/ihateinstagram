@@ -11,11 +11,12 @@ type followingServiceHandler struct {
 	FollowingService entities.FollowingService
 }
 
-func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
+func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) entities.FollowingHandler {
 	handler := &followingServiceHandler{f}
 	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", handler.FollowHandler)
 	app.Delete("/user/:user_id<guid>/followers/:follower_id<guid>", handler.UnfollowHandler)
 	app.Get("/user/:user_id<guid>/followers", handler.GetFollowersHandler)
+	return handler
 }
 
 func (f *followingServiceHandler) FollowHandler(c *fiber.Ctx) error {

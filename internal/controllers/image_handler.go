@@ -18,11 +18,12 @@ func NewImageServiceHandler(
 	i entities.ImageService,
 	p entities.PostService,
 	f entities.FollowingService,
-) {
+) entities.ImageHandler {
 	handler := &imageServiceHandler{i, p, f}
 	app.Post("/post/:post_id<guid>/image", handler.UploadImageHandler)
 	app.Get("/post/:post_id<guid>/images", handler.GetImages)
 	app.Get("/post/:post_id<guid>/thumbnails", handler.GetThumbnails)
+	return handler
 }
 
 func (i *imageServiceHandler) UploadImageHandler(c *fiber.Ctx) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
@@ -19,6 +20,15 @@ type Like struct {
 	UserID  uuid.UUID
 	PostID  uuid.UUID
 	LikedAt time.Time
+}
+
+type PostHandler interface {
+	PostHandler(c *fiber.Ctx) error
+	GettingPostHandler(c *fiber.Ctx) error
+	PostChangingHandler(c *fiber.Ctx) error
+	LikeHandler(c *fiber.Ctx) error
+	GetLikesHandler(c *fiber.Ctx) error
+	UnlikeHandler(c *fiber.Ctx) error
 }
 
 type PostService interface {

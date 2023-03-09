@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
@@ -11,6 +12,12 @@ type Following struct {
 	FollowerId     uuid.UUID
 	UserID         uuid.UUID
 	FollowingSince time.Time
+}
+
+type FollowingHandler interface {
+	FollowHandler(c *fiber.Ctx) error
+	UnfollowHandler(c *fiber.Ctx) error
+	GetFollowersHandler(c *fiber.Ctx) error
 }
 
 type FollowingService interface {

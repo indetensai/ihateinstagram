@@ -10,11 +10,12 @@ type userServiceHandler struct {
 	UserService entities.UserService
 }
 
-func NewUserServiceHandler(app *fiber.App, u entities.UserService) {
+func NewUserServiceHandler(app *fiber.App, u entities.UserService) entities.UserHandler {
 	handler := &userServiceHandler{u}
 	app.Post("/user/register", handler.RegisterHandler)
 	app.Post("/user/login", handler.LoginHandler)
 	app.Delete("/session/:id<guid>", handler.DeleteSessionHandler)
+	return handler
 }
 
 func (u *userServiceHandler) RegisterHandler(c *fiber.Ctx) error {

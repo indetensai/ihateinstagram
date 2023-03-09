@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
@@ -17,6 +18,12 @@ type Session struct {
 	SessionID uuid.UUID
 	UserID    uuid.UUID
 	CreatedAt time.Time
+}
+
+type UserHandler interface {
+	RegisterHandler(c *fiber.Ctx) error
+	LoginHandler(c *fiber.Ctx) error
+	DeleteSessionHandler(c *fiber.Ctx) error
 }
 
 type UserService interface {

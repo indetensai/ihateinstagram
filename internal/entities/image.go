@@ -4,6 +4,7 @@ import (
 	"context"
 	"mime/multipart"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
@@ -12,6 +13,12 @@ type Image struct {
 	UserID  uuid.UUID
 	PostID  uuid.UUID
 	Content []byte
+}
+
+type ImageHandler interface {
+	UploadImageHandler(c *fiber.Ctx) error
+	GetImages(c *fiber.Ctx) error
+	GetThumbnails(c *fiber.Ctx) error
 }
 
 type ImageService interface {
