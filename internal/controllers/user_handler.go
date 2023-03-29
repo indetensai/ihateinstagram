@@ -10,12 +10,11 @@ type userServiceHandler struct {
 	UserService entities.UserService
 }
 
-func NewUserServiceHandler(app *fiber.App, u entities.UserService) entities.UserHandler {
+func NewUserServiceHandler(app *fiber.App, u entities.UserService) {
 	handler := &userServiceHandler{u}
 	app.Post("/user/register", handler.RegisterHandler)
 	app.Post("/user/login", handler.LoginHandler)
 	app.Delete("/session/:id<guid>", handler.DeleteSessionHandler)
-	return handler
 }
 
 func (u *userServiceHandler) RegisterHandler(c *fiber.Ctx) error {
@@ -39,17 +38,7 @@ func (u *userServiceHandler) RegisterHandler(c *fiber.Ctx) error {
 }
 func (u *userServiceHandler) LoginHandler(c *fiber.Ctx) error {
 	username := c.FormValue("username")
-	if username == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"note": "invalid username",
-		})
-	}
 	password := c.FormValue("password")
-	if password == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"note": "invalid password",
-		})
-	}
 	session_id, err := u.UserService.Login(username, password, c.Context())
 	if err != nil {
 		return error_handling(c, err)

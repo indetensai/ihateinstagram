@@ -2,13 +2,12 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"phota/internal/controllers"
 	"phota/internal/controllers/auth"
+	"phota/internal/repository"
 	"phota/internal/usecases"
-	"phota/internal/usecases/repository"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/skip"
@@ -23,20 +22,17 @@ func Run() {
 	godotenv.Load(".env")
 	m, err := migrate.New("file://migrations", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to read migration ", err)
 	}
 	if err := m.Up(); err != nil {
-		fmt.Print(err)
+		log.Print("warn - migration failed: ", err)
 	}
 	con, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Print(err)
-		log.Fatal("baza caput")
+		log.Fatal("failed to connect to database: ", err)
 	}
-	err = con.Ping(context.Background())
-	if err != nil {
-		fmt.Print(err)
-		log.Fatal("baza caput")
+	if err = con.Ping(context.Background()); err != nil {
+		log.Print("warn - database isn't respodning to ping: ", err)
 	}
 
 	app := fiber.New()

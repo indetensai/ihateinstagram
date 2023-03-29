@@ -9,7 +9,6 @@ import (
 )
 
 type Following struct {
-	FollowerId     uuid.UUID
 	UserID         uuid.UUID
 	FollowingSince time.Time
 }

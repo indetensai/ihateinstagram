@@ -23,7 +23,7 @@ func NewPostServiceHandler(
 	app *fiber.App,
 	p entities.PostService,
 	f entities.FollowingService,
-) entities.PostHandler {
+) {
 	handler := &postServiceHandler{p, f}
 	app.Post("/post", handler.PostHandler)
 	app.Get("/post/:post_id<guid>", handler.GettingPostHandler)
@@ -32,7 +32,6 @@ func NewPostServiceHandler(
 	app.Get("/post/:post_id<guid>/likes", handler.GetLikesHandler)
 	app.Delete("/post/:post_id<guid>/like", handler.UnlikeHandler)
 	app.Delete("/post/:post_id<guid>", handler.DeletePostHandler)
-	return handler
 }
 
 func (p *postServiceHandler) PostHandler(c *fiber.Ctx) error {

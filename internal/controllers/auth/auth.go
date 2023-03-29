@@ -13,7 +13,7 @@ func New(repo entities.UserRepository) fiber.Handler {
 			c.Locals("user_id", nil)
 			return c.Next()
 		}
-		user_id, err := repo.CheckSession(session_id, c.Context())
+		user_id, err := repo.GetUserBySession(session_id, c.Context())
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).SendString("invalid session")
 		}
