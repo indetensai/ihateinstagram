@@ -20,7 +20,7 @@ func (f *followingService) Follow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
 	ctx context.Context) error {
-	err := f.repo.Follow(ctx, follower_id, user_id)
+	err := f.repo.CreateFollowing(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (f *followingService) Unfollow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
 	ctx context.Context) error {
-	err := f.repo.Unfollow(ctx, follower_id, user_id)
+	err := f.repo.DeleteFollowing(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -40,12 +40,12 @@ func (f *followingService) Unfollow(
 func (f *followingService) GetFollowers(
 	user_id uuid.UUID,
 	ctx context.Context,
-) (*[]uuid.UUID, error) {
+) ([]entities.AppUser, error) {
 	followers, err := f.repo.GetFollowers(ctx, user_id)
 	if err != nil {
 		return nil, err
 	}
-	return &followers, nil
+	return followers, nil
 }
 
 func (f *followingService) IsFollowing(

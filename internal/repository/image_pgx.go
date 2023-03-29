@@ -16,7 +16,7 @@ func NewImageRepository(db *pgx.Conn) entities.ImageRepository {
 	return &imageRepository{db: db}
 }
 
-func (i *imageRepository) UploadImage(
+func (i *imageRepository) CreateImage(
 	ctx context.Context,
 	post_id uuid.UUID,
 	user_id uuid.UUID,

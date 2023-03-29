@@ -16,7 +16,7 @@ func NewFollowingRepository(db *pgx.Conn) entities.FollowingRepository {
 	return &FollowingRepository{db: db}
 }
 
-func (f *FollowingRepository) Follow(
+func (f *FollowingRepository) CreateFollowing(
 	ctx context.Context,
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
@@ -33,7 +33,7 @@ func (f *FollowingRepository) Follow(
 	return nil
 }
 
-func (f *FollowingRepository) Unfollow(
+func (f *FollowingRepository) DeleteFollowing(
 	ctx context.Context,
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
@@ -50,20 +50,24 @@ func (f *FollowingRepository) Unfollow(
 	return nil
 }
 
-func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUID) ([]uuid.UUID, error) {
+func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUID) ([]entities.AppUser, error) {
 	rows, err := f.db.Query(
 		ctx,
-		"SELECT follower_id FROM following WHERE user_id=$1",
+		`SELECT app_user.user_id, app_user.username 
+		FROM app_user
+		INNER JOIN following ON app_user.user_id=following.follower_id
+		WHERE following.user_id=$1
+		`,
 		user_id,
 	)
 	if err != nil {
 		return nil, entities.ErrNotFound
 	}
 	defer rows.Close()
-	var followers []uuid.UUID
+	var followers []entities.AppUser
 	for rows.Next() {
-		var r uuid.UUID
-		err = rows.Scan(&r)
+		var r entities.AppUser
+		err = rows.Scan(&r.UserID, &r.Username)
 		if err != nil {
 			return nil, err
 		}

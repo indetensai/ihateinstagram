@@ -18,10 +18,10 @@ CREATE TABLE post(
 		created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 CREATE TABLE following(
-		follower_id UUID PRIMARY KEY NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
 		user_id UUID REFERENCES app_user(user_id) ON DELETE CASCADE,
+		follower_id UUID  NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
 		following_since TIMESTAMP NOT NULL DEFAULT now(),
-		UNIQUE (user_id,follower_id),
+		PRIMARY KEY (user_id,follower_id),
 		CHECK (user_id!=follower_id)
 );
 CREATE TABLE liking(

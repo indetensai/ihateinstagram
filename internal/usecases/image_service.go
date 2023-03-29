@@ -48,25 +48,25 @@ func (i *imageService) UploadImage(
 	if eg.Wait() != nil {
 		return err
 	}
-	err = i.repo.UploadImage(ctx, post_id, user_id, img_buf.Bytes(), thumbnail_buf.Bytes())
+	err = i.repo.CreateImage(ctx, post_id, user_id, img_buf.Bytes(), thumbnail_buf.Bytes())
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID) (*[][]byte, error) {
+func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID) ([][]byte, error) {
 	images, err := i.repo.GetImages(ctx, post_id)
 	if err != nil {
 		return nil, err
 	}
-	return &images, nil
+	return images, nil
 }
 
-func (i *imageService) GetThumbnails(ctx context.Context, post_id uuid.UUID) (*[][]byte, error) {
+func (i *imageService) GetThumbnails(ctx context.Context, post_id uuid.UUID) ([][]byte, error) {
 	thumbnails, err := i.repo.GetThumbnails(ctx, post_id)
 	if err != nil {
 		return nil, err
 	}
-	return &thumbnails, nil
+	return thumbnails, nil
 }

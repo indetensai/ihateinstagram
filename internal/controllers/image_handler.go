@@ -77,7 +77,7 @@ func (i *imageServiceHandler) GetImages(c *fiber.Ctx) error {
 		return error_handling(c, err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"images": *images})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"images": images})
 }
 
 func (i *imageServiceHandler) GetThumbnails(c *fiber.Ctx) error {
@@ -104,5 +104,5 @@ func (i *imageServiceHandler) GetThumbnails(c *fiber.Ctx) error {
 	if err != nil {
 		return error_handling(c, err)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"thumbnails": *thumbnails})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"thumbnails": thumbnails})
 }
