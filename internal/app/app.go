@@ -3,30 +3,19 @@ package app
 import (
 	"context"
 	"log"
-	"os"
 	"phota/internal/controllers"
 	"phota/internal/controllers/auth"
 	"phota/internal/repository"
 	"phota/internal/usecases"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5"
-	"github.com/joho/godotenv"
 )
 
-func Run() {
-	godotenv.Load(".env")
-	m, err := migrate.New("file://migrations", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatal("failed to read migration ", err)
-	}
-	if err := m.Up(); err != nil {
-		log.Print("warn - migration failed: ", err)
-	}
-	con, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+func Run(databaseURL string, port string) {
+	con, err := pgx.Connect(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatal("failed to connect to database: ", err)
 	}
@@ -54,5 +43,5 @@ func Run() {
 	image_service := usecases.NewImageService(image_repository, post_service, following_service)
 	controllers.NewImageServiceHandler(app, image_service)
 
-	app.Listen(":8080")
+	app.Listen(":" + port)
 }
