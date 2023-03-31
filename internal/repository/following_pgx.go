@@ -56,8 +56,7 @@ func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUI
 		`SELECT app_user.user_id, app_user.username 
 		FROM app_user
 		INNER JOIN following ON app_user.user_id=following.follower_id
-		WHERE following.user_id=$1
-		`,
+		WHERE following.user_id=$1`,
 		user_id,
 	)
 	if err != nil {

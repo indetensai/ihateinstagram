@@ -19,6 +19,9 @@ func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
 }
 
 func (f *followingServiceHandler) FollowHandler(c *fiber.Ctx) error {
+	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -34,6 +37,9 @@ func (f *followingServiceHandler) FollowHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 func (f *followingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
+	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)

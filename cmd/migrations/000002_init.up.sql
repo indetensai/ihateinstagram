@@ -24,7 +24,7 @@ CREATE TABLE following(
 		PRIMARY KEY (user_id,follower_id),
 		CHECK (user_id!=follower_id)
 );
-CREATE TABLE liking(
+CREATE TABLE like(
 		user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
 		post_id UUID NOT NULL REFERENCES post(post_id) ON DELETE CASCADE,
 		created_at TIMESTAMP NOT NULL DEFAULT now(),

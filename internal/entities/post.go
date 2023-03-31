@@ -15,38 +15,29 @@ type Post struct {
 	CreatedAt   time.Time
 }
 
-type Like struct {
-	UserID  uuid.UUID
-	PostID  uuid.UUID
-	LikedAt time.Time
+type ChangePostParams struct {
+	Visibility  string
+	Description string
+	PostID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 type PostService interface {
-	Post(user_id *uuid.UUID, ctx context.Context, desription string) (*uuid.UUID, error)
-	GettingPost(post_id uuid.UUID, user_id *uuid.UUID, ctx context.Context) (*Post, error)
-	PostChanging(
-		visibility string,
-		description string,
-		post_id uuid.UUID,
-		user_id *uuid.UUID,
-		ctx context.Context) error
-	Like(post_id uuid.UUID, user_id *uuid.UUID, ctx context.Context) error
-	GetLikes(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*[]uuid.UUID, error)
-	Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
-	DeletePost(post_id uuid.UUID, ctx context.Context) error
+	Post(user_id uuid.UUID, ctx context.Context, desription string) (*uuid.UUID, error)
+	GetPost(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) (*Post, error)
+	ChangePost(content ChangePostParams, ctx context.Context) error
+	Like(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) error
+	GetLikes(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) ([]AppUser, error)
+	Unlike(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) error
+	DeletePost(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) error
 }
 
 type PostRepository interface {
-	Post(user_id uuid.UUID, ctx context.Context, desription string) (*uuid.UUID, error)
-	GettingPost(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*Post, error)
-	PostChanging(
-		user_id *uuid.UUID,
-		visibility string,
-		description string,
-		post_id uuid.UUID,
-		ctx context.Context) error
-	Like(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
-	GetLikes(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) (*[]uuid.UUID, error)
-	Unlike(user_id *uuid.UUID, post_id uuid.UUID, ctx context.Context) error
+	CreatePost(user_id uuid.UUID, ctx context.Context, desription string) (*uuid.UUID, error)
+	GetPostByID(user_id uuid.UUID, post_id uuid.UUID, ctx context.Context) (*Post, error)
+	ChangePost(content ChangePostParams, ctx context.Context) error
+	CreateLike(user_id uuid.UUID, post_id uuid.UUID, ctx context.Context) error
+	GetLikes(post_id uuid.UUID, ctx context.Context) ([]AppUser, error)
+	DeleteLike(user_id uuid.UUID, post_id uuid.UUID, ctx context.Context) error
 	DeletePost(post_id uuid.UUID, ctx context.Context) error
 }
