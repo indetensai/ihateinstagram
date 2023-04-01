@@ -79,7 +79,7 @@ func (p *PostRepository) CreateLike(user_id uuid.UUID, post_id uuid.UUID, ctx co
 	}
 	_, err = tx.Exec(
 		ctx,
-		"INSERT INTO like (user_id,post_id) VALUES ($1,$2)",
+		"INSERT INTO likes (user_id,post_id) VALUES ($1,$2)",
 		user_id,
 		post_id,
 	)
@@ -101,7 +101,7 @@ func (p *PostRepository) GetLikes(
 		ctx,
 		`SELECT app_user.user_id, app_user.username 
 		FROM app_user
-		INNER JOIN like ON app_user.user_id=like.user_id
+		INNER JOIN likes ON app_user.user_id=like.user_id
 		WHERE like.post_id=$1`,
 		post_id,
 	)
@@ -124,7 +124,7 @@ func (p *PostRepository) GetLikes(
 func (p *PostRepository) DeleteLike(user_id uuid.UUID, post_id uuid.UUID, ctx context.Context) error {
 	_, err := p.db.Exec(
 		ctx,
-		"DELETE FROM like WHERE user_id=$1 AND post_id=$2",
+		"DELETE FROM likes WHERE user_id=$1 AND post_id=$2",
 		user_id,
 		post_id,
 	)

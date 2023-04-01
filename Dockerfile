@@ -12,6 +12,6 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /usr/src/app
 EXPOSE 8080
-COPY migrations/ ./migrations
+COPY cmd/migrations/ ./migrations
 COPY --from=0 /usr/src/app/cmd/ ./
 ENTRYPOINT [ "./cmd" ]
