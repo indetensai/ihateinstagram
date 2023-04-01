@@ -8,8 +8,8 @@ import (
 )
 
 type followingService struct {
-	repo         entities.FollowingRepository
-	user_service entities.UserService
+	followingRepo entities.FollowingRepository
+	userService   entities.UserService
 }
 
 func NewFollowingService(f entities.FollowingRepository, u entities.UserService) entities.FollowingService {
@@ -20,7 +20,7 @@ func (f *followingService) Follow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
 	ctx context.Context) error {
-	err := f.repo.CreateFollowing(ctx, follower_id, user_id)
+	err := f.followingRepo.CreateFollowing(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (f *followingService) Unfollow(
 	follower_id uuid.UUID,
 	user_id uuid.UUID,
 	ctx context.Context) error {
-	err := f.repo.DeleteFollowing(ctx, follower_id, user_id)
+	err := f.followingRepo.DeleteFollowing(ctx, follower_id, user_id)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (f *followingService) GetFollowers(
 	user_id uuid.UUID,
 	ctx context.Context,
 ) ([]entities.AppUser, error) {
-	followers, err := f.repo.GetFollowers(ctx, user_id)
+	followers, err := f.followingRepo.GetFollowers(ctx, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +53,6 @@ func (f *followingService) IsFollowing(
 	follower_id uuid.UUID,
 	ctx context.Context,
 ) bool {
-	check := f.repo.IsFollowing(user_id, follower_id, ctx)
+	check := f.followingRepo.IsFollowing(user_id, follower_id, ctx)
 	return check
 }

@@ -14,9 +14,9 @@ import (
 )
 
 type imageService struct {
-	repo             entities.ImageRepository
-	PostService      entities.PostService
-	FollowingService entities.FollowingService
+	imageRepo        entities.ImageRepository
+	postService      entities.PostService
+	followingService entities.FollowingService
 }
 
 func NewImageService(
@@ -24,7 +24,7 @@ func NewImageService(
 	postService entities.PostService,
 	followingService entities.FollowingService,
 ) entities.ImageService {
-	return &imageService{repo: repo, PostService: postService, FollowingService: followingService}
+	return &imageService{imageRepo: repo, postService: postService, followingService: followingService}
 }
 
 func (i *imageService) UploadImage(
@@ -33,7 +33,7 @@ func (i *imageService) UploadImage(
 	user_id uuid.UUID,
 	content *multipart.FileHeader,
 ) error {
-	post, err := i.PostService.GetPost(post_id, user_id, context.Background())
+	post, err := i.postService.GetPost(post_id, user_id, context.Background())
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (i *imageService) UploadImage(
 	if eg.Wait() != nil {
 		return err
 	}
-	err = i.repo.CreateImage(ctx, post_id, user_id, img_buf.Bytes(), thumbnail_buf.Bytes())
+	err = i.imageRepo.CreateImage(ctx, post_id, user_id, img_buf.Bytes(), thumbnail_buf.Bytes())
 	if err != nil {
 		return err
 	}
@@ -69,13 +69,13 @@ func (i *imageService) UploadImage(
 }
 
 func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID, user_id uuid.UUID) ([][]byte, error) {
-	post, err := i.PostService.GetPost(post_id, user_id, context.Background())
+	post, err := i.postService.GetPost(post_id, user_id, context.Background())
 	if err != nil {
 		return nil, err
 	}
 	switch post.Visibility {
 	case "followers":
-		if !i.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !i.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return nil, entities.ErrNotAuthorized
 		}
 	case "private":
@@ -83,7 +83,7 @@ func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID, user_id
 			return nil, entities.ErrNotAuthorized
 		}
 	}
-	images, err := i.repo.GetImages(ctx, post_id)
+	images, err := i.imageRepo.GetImages(ctx, post_id)
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +91,13 @@ func (i *imageService) GetImages(ctx context.Context, post_id uuid.UUID, user_id
 }
 
 func (i *imageService) GetThumbnails(ctx context.Context, post_id uuid.UUID, user_id uuid.UUID) ([][]byte, error) {
-	post, err := i.PostService.GetPost(post_id, user_id, context.Background())
+	post, err := i.postService.GetPost(post_id, user_id, context.Background())
 	if err != nil {
 		return nil, err
 	}
 	switch post.Visibility {
 	case "followers":
-		if !i.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !i.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return nil, entities.ErrNotAuthorized
 		}
 	case "private":
@@ -105,7 +105,7 @@ func (i *imageService) GetThumbnails(ctx context.Context, post_id uuid.UUID, use
 			return nil, entities.ErrNotAuthorized
 		}
 	}
-	thumbnails, err := i.repo.GetThumbnails(ctx, post_id)
+	thumbnails, err := i.imageRepo.GetThumbnails(ctx, post_id)
 	if err != nil {
 		return nil, err
 	}

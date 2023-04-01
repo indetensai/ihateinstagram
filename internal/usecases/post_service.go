@@ -8,9 +8,9 @@ import (
 )
 
 type postService struct {
-	repo             entities.PostRepository
-	UserService      entities.UserService
-	FollowingService entities.FollowingService
+	postRepo         entities.PostRepository
+	userService      entities.UserService
+	followingService entities.FollowingService
 }
 
 func NewPostService(
@@ -18,11 +18,11 @@ func NewPostService(
 	u entities.UserService,
 	f entities.FollowingService,
 ) entities.PostService {
-	return &postService{repo: p, UserService: u, FollowingService: f}
+	return &postService{postRepo: p, userService: u, followingService: f}
 }
 
 func (p *postService) Post(user_id uuid.UUID, ctx context.Context, desription string) (*uuid.UUID, error) {
-	post_id, err := p.repo.CreatePost(user_id, ctx, desription)
+	post_id, err := p.postRepo.CreatePost(user_id, ctx, desription)
 	return post_id, err
 }
 
@@ -31,13 +31,13 @@ func (p *postService) GetPost(
 	user_id uuid.UUID,
 	ctx context.Context,
 ) (*entities.Post, error) {
-	post, err := p.repo.GetPostByID(user_id, post_id, ctx)
+	post, err := p.postRepo.GetPostByID(user_id, post_id, ctx)
 	if err != nil {
 		return nil, err
 	}
 	switch post.Visibility {
 	case "followers":
-		if !p.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !p.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return nil, entities.ErrNotAuthorized
 		}
 	case "private":
@@ -56,7 +56,13 @@ func (p *postService) ChangePost(content entities.ChangePostParams, ctx context.
 	if post.UserID != content.UserID {
 		return entities.ErrNotAuthorized
 	}
-	return p.repo.ChangePost(content, ctx)
+	if content.Visibility == "" {
+		content.Visibility = post.Visibility
+	}
+	if content.Description == "" {
+		content.Description = post.Description
+	}
+	return p.postRepo.ChangePost(content, ctx)
 }
 
 func (p *postService) Like(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) error {
@@ -66,7 +72,7 @@ func (p *postService) Like(post_id uuid.UUID, user_id uuid.UUID, ctx context.Con
 	}
 	switch post.Visibility {
 	case "followers":
-		if !p.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !p.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return entities.ErrNotAuthorized
 		}
 	case "private":
@@ -74,7 +80,7 @@ func (p *postService) Like(post_id uuid.UUID, user_id uuid.UUID, ctx context.Con
 			return entities.ErrNotAuthorized
 		}
 	}
-	return p.repo.CreateLike(user_id, post_id, ctx)
+	return p.postRepo.CreateLike(user_id, post_id, ctx)
 }
 
 func (p *postService) GetLikes(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) ([]entities.AppUser, error) {
@@ -84,7 +90,7 @@ func (p *postService) GetLikes(post_id uuid.UUID, user_id uuid.UUID, ctx context
 	}
 	switch post.Visibility {
 	case "followers":
-		if !p.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !p.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return nil, entities.ErrNotAuthorized
 		}
 	case "private":
@@ -92,7 +98,7 @@ func (p *postService) GetLikes(post_id uuid.UUID, user_id uuid.UUID, ctx context
 			return nil, entities.ErrNotAuthorized
 		}
 	}
-	likes, err := p.repo.GetLikes(post_id, ctx)
+	likes, err := p.postRepo.GetLikes(post_id, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +112,7 @@ func (p *postService) Unlike(user_id uuid.UUID, post_id uuid.UUID, ctx context.C
 	}
 	switch post.Visibility {
 	case "followers":
-		if !p.FollowingService.IsFollowing(post.UserID, user_id, context.Background()) || post.UserID != user_id {
+		if post.UserID != user_id || !p.followingService.IsFollowing(post.UserID, user_id, context.Background()) {
 			return entities.ErrNotAuthorized
 		}
 	case "private":
@@ -114,7 +120,7 @@ func (p *postService) Unlike(user_id uuid.UUID, post_id uuid.UUID, ctx context.C
 			return entities.ErrNotAuthorized
 		}
 	}
-	return p.repo.DeleteLike(user_id, post_id, ctx)
+	return p.postRepo.DeleteLike(user_id, post_id, ctx)
 }
 
 func (p *postService) DeletePost(post_id uuid.UUID, user_id uuid.UUID, ctx context.Context) error {
@@ -125,5 +131,5 @@ func (p *postService) DeletePost(post_id uuid.UUID, user_id uuid.UUID, ctx conte
 	if post.UserID != user_id {
 		return entities.ErrNotAuthorized
 	}
-	return p.repo.DeletePost(post_id, ctx)
+	return p.postRepo.DeletePost(post_id, ctx)
 }

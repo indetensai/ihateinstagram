@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"phota/internal/controllers"
-	"phota/internal/controllers/auth"
+	middleware "phota/internal/controllers/auth"
 	"phota/internal/repository"
 	"phota/internal/usecases"
 
@@ -29,7 +29,7 @@ func Run(databaseURL string, port string) {
 	user_service := usecases.NewUserService(user_repository)
 	controllers.NewUserServiceHandler(app, user_service)
 
-	app.Use(auth.New(user_repository))
+	app.Use(middleware.New(user_repository))
 
 	following_repository := repository.NewFollowingRepository(con)
 	following_service := usecases.NewFollowingService(following_repository, user_service)

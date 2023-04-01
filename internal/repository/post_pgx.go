@@ -50,49 +50,13 @@ func (p *PostRepository) GetPostByID(
 }
 
 func (p *PostRepository) ChangePost(content entities.ChangePostParams, ctx context.Context) error {
-	var received_post entities.Post
-	tx, err := p.db.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-	err = tx.QueryRow(
+	_, err := p.db.Exec(
 		ctx,
-		"SELECT * FROM post WHERE post_id=$1",
+		"UPDATE post SET vision=$1,description=$2 WHERE post_id=$3",
+		content.Visibility,
+		content.Description,
 		content.PostID,
-	).Scan(
-		&received_post.PostID,
-		&received_post.UserID,
-		&received_post.Description,
-		&received_post.Visibility,
-		&received_post.CreatedAt,
 	)
-	if err != nil {
-		return err
-	}
-	if *&content.UserID != received_post.UserID {
-		return entities.ErrNotAuthorized
-	}
-	check := received_post
-	if content.Description != check.Description && content.Description != "" {
-		check.Description = content.Description
-	}
-	if check.Visibility != content.Visibility && content.Visibility != "" {
-		check.Visibility = content.Visibility
-	}
-	if check != received_post {
-		_, err = tx.Exec(
-			ctx,
-			"UPDATE post SET vision=$1,description=$2 WHERE post_id=$3",
-			check.Visibility,
-			check.Description,
-			content.PostID,
-		)
-		if err != nil {
-			return err
-		}
-	}
-	tx.Commit(ctx)
 	if err != nil {
 		return err
 	}

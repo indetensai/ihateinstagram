@@ -74,13 +74,13 @@ func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	decoder := json.NewDecoder(bytes.NewReader(c.Body()))
-	var result decoding
-	err := decoder.Decode(&result)
+	var data decoding
+	err := decoder.Decode(&data)
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
-	visibility := result.Visibility
-	description := result.Description
+	visibility := data.Visibility
+	description := data.Description
 	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id_raw := c.Params("post_id")
 	post_id, err := uuid.Parse(post_id_raw)

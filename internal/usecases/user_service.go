@@ -10,7 +10,7 @@ import (
 )
 
 type userService struct {
-	repo entities.UserRepository
+	userRepo entities.UserRepository
 }
 
 func NewUserService(u entities.UserRepository) entities.UserService {
@@ -35,7 +35,7 @@ func (u *userService) CheckSession(session_id string, ctx context.Context) (*uui
 	if session_id == "" {
 		return nil, entities.ErrEmptySession
 	}
-	user, err := u.repo.GetUserBySession(session_id, ctx)
+	user, err := u.userRepo.GetUserBySession(session_id, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (u *userService) CheckSession(session_id string, ctx context.Context) (*uui
 }
 
 func (u *userService) DeleteSession(session_id string, ctx context.Context) error {
-	err := u.repo.DeleteSession(session_id, ctx)
+	err := u.userRepo.DeleteSession(session_id, ctx)
 	return err
 }
 
@@ -52,7 +52,7 @@ func (u *userService) Login(username string, password string, ctx context.Contex
 	if err != nil {
 		return nil, err
 	}
-	err = u.repo.ValidateUserCredentials(username, password, session_id, ctx)
+	err = u.userRepo.ValidateUserCredentials(username, password, session_id, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -61,5 +61,5 @@ func (u *userService) Login(username string, password string, ctx context.Contex
 }
 
 func (u *userService) Register(username string, password string, ctx context.Context) error {
-	return u.repo.CreateUser(username, password, ctx)
+	return u.userRepo.CreateUser(username, password, ctx)
 }
