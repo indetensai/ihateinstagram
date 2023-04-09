@@ -20,7 +20,7 @@ func (p *PostRepository) CreatePost(user_id uuid.UUID, ctx context.Context, desr
 	var post_id uuid.UUID
 	err := p.db.QueryRow(
 		ctx,
-		"INSERT INTO post (user_id,description) VALUES ($1,$2) RETURNING post_id",
+		"INSERT INTO posts (user_id,description) VALUES ($1,$2) RETURNING post_id",
 		user_id,
 		desription,
 	).Scan(&post_id)
@@ -38,7 +38,7 @@ func (p *PostRepository) GetPostByID(
 	var post entities.Post
 	err := p.db.QueryRow(
 		ctx,
-		"SELECT * FROM post WHERE post_id=$1",
+		"SELECT * FROM posts WHERE post_id=$1",
 		post_id,
 	).Scan(
 		&post.PostID, &post.UserID, &post.Description, &post.Visibility, &post.CreatedAt,
@@ -52,7 +52,7 @@ func (p *PostRepository) GetPostByID(
 func (p *PostRepository) ChangePost(content entities.ChangePostParams, ctx context.Context) error {
 	_, err := p.db.Exec(
 		ctx,
-		"UPDATE post SET vision=$1,description=$2 WHERE post_id=$3",
+		"UPDATE posts SET vision=$1,description=$2 WHERE post_id=$3",
 		content.Visibility,
 		content.Description,
 		content.PostID,
@@ -71,7 +71,7 @@ func (p *PostRepository) CreateLike(user_id uuid.UUID, post_id uuid.UUID, ctx co
 	defer tx.Rollback(ctx)
 	_, err = tx.Exec(
 		ctx,
-		"SELECT 1 FROM post WHERE post_id=$1",
+		"SELECT 1 FROM posts WHERE post_id=$1",
 		post_id,
 	)
 	if err != nil {
@@ -99,10 +99,10 @@ func (p *PostRepository) GetLikes(
 ) ([]entities.AppUser, error) {
 	rows, err := p.db.Query(
 		ctx,
-		`SELECT app_user.user_id, app_user.username 
-		FROM app_user
-		INNER JOIN likes ON app_user.user_id=like.user_id
-		WHERE like.post_id=$1`,
+		`SELECT users.user_id, users.username 
+		FROM users
+		INNER JOIN likes ON users.user_id=likes.user_id
+		WHERE likes.post_id=$1`,
 		post_id,
 	)
 	if err != nil {
@@ -139,7 +139,7 @@ func (p *PostRepository) DeletePost(post_id uuid.UUID, ctx context.Context) erro
 	defer tx.Rollback(ctx)
 	_, err = p.db.Exec(
 		ctx,
-		"DELETE FROM image WHERE post_id=$1",
+		"DELETE FROM images WHERE post_id=$1",
 		post_id,
 	)
 	if err != nil {
@@ -147,7 +147,7 @@ func (p *PostRepository) DeletePost(post_id uuid.UUID, ctx context.Context) erro
 	}
 	_, err = p.db.Exec(
 		ctx,
-		"DELETE FROM post WHERE post_id=$1",
+		"DELETE FROM posts WHERE post_id=$1",
 		post_id,
 	)
 	if err != nil {

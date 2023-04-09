@@ -35,11 +35,11 @@ func NewPostServiceHandler(
 }
 
 func (p *postServiceHandler) PostHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	description := c.FormValue("description")
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id, err := p.PostService.Post(*user_id, c.Context(), description)
 	if err != nil {
 		return error_handling(c, err)
@@ -48,11 +48,11 @@ func (p *postServiceHandler) PostHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id_raw := c.Params("post_id")
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
@@ -70,7 +70,8 @@ func (p *postServiceHandler) GettingPostHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	decoder := json.NewDecoder(bytes.NewReader(c.Body()))
@@ -81,7 +82,6 @@ func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 	}
 	visibility := data.Visibility
 	description := data.Description
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id_raw := c.Params("post_id")
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
@@ -100,16 +100,13 @@ func (p *postServiceHandler) PostChangingHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) LikeHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id_raw := c.Params("post_id")
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
-	post_id, err := uuid.Parse(post_id_raw)
-	if err != nil {
-		return err
-	}
-	err = p.PostService.Like(post_id, *user_id, c.Context())
+	post_id, _ := uuid.Parse(post_id_raw)
+	err := p.PostService.Like(post_id, *user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
@@ -117,11 +114,11 @@ func (p *postServiceHandler) LikeHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id_raw := c.Params("post_id")
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
@@ -134,11 +131,11 @@ func (p *postServiceHandler) GetLikesHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id_raw := c.Params("post_id")
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {
 		return err
@@ -151,10 +148,10 @@ func (p *postServiceHandler) UnlikeHandler(c *fiber.Ctx) error {
 }
 
 func (p *postServiceHandler) DeletePostHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	post_id_raw := c.Params("post_id")
 	post_id, err := uuid.Parse(post_id_raw)
 	if err != nil {

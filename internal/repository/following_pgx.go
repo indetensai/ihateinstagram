@@ -23,7 +23,7 @@ func (f *FollowingRepository) CreateFollowing(
 ) error {
 	_, err := f.db.Exec(
 		ctx,
-		"INSERT INTO following (follower_id,user_id) VALUES ($1,$2)",
+		"INSERT INTO follows (follower_id,user_id) VALUES ($1,$2)",
 		follower_id,
 		user_id,
 	)
@@ -40,7 +40,7 @@ func (f *FollowingRepository) DeleteFollowing(
 ) error {
 	_, err := f.db.Exec(
 		ctx,
-		"DELETE FROM following WHERE user_id=$1 AND follower_id=$2",
+		"DELETE FROM follows WHERE user_id=$1 AND follower_id=$2",
 		user_id,
 		follower_id,
 	)
@@ -53,10 +53,10 @@ func (f *FollowingRepository) DeleteFollowing(
 func (f *FollowingRepository) GetFollowers(ctx context.Context, user_id uuid.UUID) ([]entities.AppUser, error) {
 	rows, err := f.db.Query(
 		ctx,
-		`SELECT app_user.user_id, app_user.username 
-		FROM app_user
-		INNER JOIN following ON app_user.user_id=following.follower_id
-		WHERE following.user_id=$1`,
+		`SELECT users.user_id, users.username 
+		FROM users
+		INNER JOIN follows ON users.user_id=follows.follower_id
+		WHERE follows.user_id=$1`,
 		user_id,
 	)
 	if err != nil {
@@ -82,7 +82,7 @@ func (f *FollowingRepository) IsFollowing(
 ) bool {
 	_, err := f.db.Exec(
 		ctx,
-		"SELECT EXISTS (SELECT 1 FROM following WHERE user_id=$1 AND follower_id=$2)",
+		"SELECT EXISTS (SELECT 1 FROM follows WHERE user_id=$1 AND follower_id=$2)",
 		user_id,
 		follower_id,
 	)

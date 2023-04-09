@@ -25,7 +25,7 @@ func (i *imageRepository) CreateImage(
 ) error {
 	_, err := i.db.Exec(
 		ctx,
-		"INSERT INTO image (post_id,user_id,content,thumbnail) VALUES ($1,$2,$3,$4)",
+		"INSERT INTO images (post_id,user_id,content,thumbnail) VALUES ($1,$2,$3,$4)",
 		post_id,
 		user_id,
 		content,
@@ -43,7 +43,7 @@ func (i *imageRepository) GetImages(
 ) ([][]byte, error) {
 	rows, err := i.db.Query(
 		ctx,
-		"SELECT content FROM image WHERE post_id=$1",
+		"SELECT content FROM images WHERE post_id=$1",
 		post_id,
 	)
 	if err != nil {
@@ -68,7 +68,7 @@ func (i *imageRepository) GetThumbnails(
 ) ([][]byte, error) {
 	rows, err := i.db.Query(
 		ctx,
-		"SELECT thumbnail FROM image WHERE post_id=$1",
+		"SELECT thumbnail FROM images WHERE post_id=$1",
 		post_id,
 	)
 	if err != nil {

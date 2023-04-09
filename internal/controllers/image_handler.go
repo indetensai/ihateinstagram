@@ -22,14 +22,14 @@ func NewImageServiceHandler(
 }
 
 func (i *imageServiceHandler) UploadImageHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id, err := uuid.Parse(c.Params("post_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	content, err := c.FormFile("image")
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -42,14 +42,14 @@ func (i *imageServiceHandler) UploadImageHandler(c *fiber.Ctx) error {
 }
 
 func (i *imageServiceHandler) GetImages(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id, err := uuid.Parse(c.Params("post_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	images, err := i.ImageService.GetImages(c.Context(), post_id, *user_id)
 	if err != nil {
 		return error_handling(c, err)
@@ -59,14 +59,14 @@ func (i *imageServiceHandler) GetImages(c *fiber.Ctx) error {
 }
 
 func (i *imageServiceHandler) GetThumbnails(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	user_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	post_id, err := uuid.Parse(c.Params("post_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	user_id, _ := c.Locals("user_id").(*uuid.UUID)
 	thumbnails, err := i.ImageService.GetThumbnails(c.Context(), post_id, *user_id)
 	if err != nil {
 		return error_handling(c, err)

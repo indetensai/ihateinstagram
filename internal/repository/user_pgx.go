@@ -24,7 +24,7 @@ func (u *UserRepository) GetUserBySession(session_id string, ctx context.Context
 	var user_id uuid.UUID
 	err := u.db.QueryRow(
 		ctx,
-		"SELECT user_id FROM session WHERE session_id=$1",
+		"SELECT user_id FROM sessions WHERE session_id=$1",
 		session_id,
 	).Scan(&user_id)
 	if err != nil {
@@ -36,7 +36,7 @@ func (u *UserRepository) GetUserBySession(session_id string, ctx context.Context
 func (u *UserRepository) DeleteSession(session_id string, ctx context.Context) error {
 	_, err := u.db.Exec(
 		ctx,
-		"DELETE FROM session WHERE session_id=$1",
+		"DELETE FROM sessions WHERE session_id=$1",
 		session_id,
 	)
 	if err != nil {
@@ -59,7 +59,7 @@ func (u *UserRepository) ValidateUserCredentials(
 	var user entities.UserCredentials
 	err = tx.QueryRow(
 		ctx,
-		"SELECT * FROM app_user WHERE username=$1",
+		"SELECT * FROM users WHERE username=$1",
 		username,
 	).Scan(&user.UserID, &user.Username, &user.Password)
 	if err != nil {
@@ -71,7 +71,7 @@ func (u *UserRepository) ValidateUserCredentials(
 	}
 	_, err = tx.Exec(
 		ctx,
-		"INSERT INTO session (session_id,user_id) VALUES ($1,$2)",
+		"INSERT INTO sessions (session_id,user_id) VALUES ($1,$2)",
 		session_id, user.UserID,
 	)
 	if err != nil {
@@ -92,7 +92,7 @@ func (u *UserRepository) CreateUser(username string, password string, ctx contex
 	}
 	_, err = u.db.Exec(
 		ctx,
-		"INSERT INTO app_user (username,password) VALUES ($1,$2)",
+		"INSERT INTO users (username,password) VALUES ($1,$2)",
 		username,
 		string(password_hashed),
 	)
@@ -110,7 +110,7 @@ func (u *UserRepository) GetUserByID(user_id uuid.UUID, ctx context.Context) (*e
 	var user entities.AppUser
 	err := u.db.QueryRow(
 		ctx,
-		"SELECT (user_id,username) FROM app_user WHERE user_id=$1",
+		"SELECT (user_id,username) FROM users WHERE user_id=$1",
 		user_id,
 	).Scan(&user)
 	if err != nil {
