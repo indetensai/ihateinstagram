@@ -1,4 +1,4 @@
-[Русская версия]()
+[Русская версия](https://github.com/indetensai/ihateinstagram/blob/main/README_ru.md)
 
 # IHATEINSTAGRAM
 **IHATEINSTAGRAM** is a Golang backend project that showcases my knowledge and skills in web development. It uses Fiber, a fast and lightweight web framework, to handle HTTP requests and responses. It uses pgx, a PostgreSQL driver and toolkit, to connect and interact with the database. It uses sessions for secure authentication and authorization, to protect the endpoints and verify the users. **IHATEINSTAGRAM** is designed with clean architecture principles. It can be easily deployed with Docker, a platform for containerization and orchestration.
@@ -35,17 +35,17 @@ To run **IHATEINSTAGRAM**, follow these steps:
 The **IHATEINSTAGRAM** API has the following endpoints:
 - `POST /user/register`: Create a new user account.
 - `POST /user/login`: Login with an existing user account and get a session.
-- `DELETE /session/:id`: Delete session.
-- `PUT /user/:user_id/followers/:follower_id`: Follow follower_id user on user_id user. Requires authentication.
-- `DELETE /user/:user_id/followers/:follower_id`: Unfollow follower_id user on user_id user. Requires authentication.
-- `GET /user/:user_id/followers`:Get followers of user_id user. 
-- `POST /post"`: Create post. Requires authentication.
-- `GET /post/:post_id` Get post by post_id. Requires authentication.
-- `PATCH /post/:post_id`: Change post_id post. Requires authentication.
-- `PUT /post/:post_id/like`: Like post_id post. Requires authentication.
-- `GET /post/:post_id/likes`: Get likes on post_id post.
-- `DELETE /post/:post_id/like`: Delete like on post_id post. Requires authentication.
-- `DELETE /post/:post_id`: Delete post_id post. Requires authentication.
-- `POST /post/:post_id/image`: Upload image in post_id post. Requires authentication.
-- `GET /post/:post_id/images`: Get post_id post images.
-- `GET /post/:post_id/thumbnails`: Get post_id post thumbnails
+- `DELETE /session/:id`: Delete a session.
+- `PUT /user/:user_id/follow`: Make user follow user_id user. Requires authentication.
+- `DELETE /user/:user_id/unfollow`: Unfollows the user from the user with user_id. Requires authentication.
+- `GET /user/:user_id/followers`:Get followers of the user_id user. 
+- `POST /post"`: Create a post. Requires authentication.
+- `GET /post/:post_id` Get a post by post_id. Requires authentication.
+- `PATCH /post/:post_id`: Change a post_id post. Requires authentication.
+- `PUT /post/:post_id/like`: Like a post_id post. Requires authentication.
+- `GET /post/:post_id/likes`: Get likes on a post_id post.
+- `DELETE /post/:post_id/like`: Delete a like on post_id post. Requires authentication.
+- `DELETE /post/:post_id`: Delete a post_id post. Requires authentication.
+- `POST /post/:post_id/image`: Upload an image in a post_id post. Requires authentication.
+- `GET /post/:post_id/images`: Get images of a post_id post .
+- `GET /post/:post_id/thumbnails`: Get thumbnails of a post_id post 

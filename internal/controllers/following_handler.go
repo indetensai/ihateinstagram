@@ -13,42 +13,36 @@ type followingServiceHandler struct {
 
 func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
 	handler := &followingServiceHandler{f}
-	app.Put("/user/:user_id<guid>/followers/:follower_id<guid>", handler.FollowHandler)
-	app.Delete("/user/:user_id<guid>/followers/:follower_id<guid>", handler.UnfollowHandler)
+	app.Put("/user/:user_id<guid>/follow", handler.FollowHandler)
+	app.Delete("/user/:user_id<guid>/unfollow", handler.UnfollowHandler)
 	app.Get("/user/:user_id<guid>/followers", handler.GetFollowersHandler)
 }
 
 func (f *followingServiceHandler) FollowHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	follower_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	follower_id, err := uuid.Parse(c.Params("follower_id"))
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	err = f.FollowingService.Follow(follower_id, user_id, c.Context())
+	err = f.FollowingService.Follow(*follower_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
 func (f *followingServiceHandler) UnfollowHandler(c *fiber.Ctx) error {
-	if _, ok := c.Locals("user_id").(*uuid.UUID); !ok {
+	follower_id, ok := c.Locals("user_id").(*uuid.UUID)
+	if !ok {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 	user_id, err := uuid.Parse(c.Params("user_id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	follower_id, err := uuid.Parse(c.Params("follower_id"))
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	err = f.FollowingService.Unfollow(follower_id, user_id, c.Context())
+	err = f.FollowingService.Unfollow(*follower_id, user_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)
 	}
