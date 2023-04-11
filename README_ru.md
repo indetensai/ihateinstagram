@@ -35,17 +35,17 @@
 **IHATEINSTAGRAM** API имеет следующие конечные точки:
 - `POST /user/register`: Создать новую учетную запись пользователя.
 - `POST /user/login`: Войти в систему с существующей учетной записью пользователя и получите сессию.
-- `DELETE /session/:id`: Удалить сессию.
-- `PUT /user/:user_id/follow`: Подписывает пользователя на пользователя user_id. Требуется аутентификация.
-- `DELETE /user/:user_id/unfollow`: Отменяет подписку на пользователя от пользователя с user_id. Требуется аутентификация.
+- `DELETE /session/:session_id`: Удалить сессию.
+- `POST /user/:user_id/follow`: Подписывает пользователя на пользователя user_id. Требуется аутентификация.
+- `POST /user/:user_id/unfollow`: Отменяет подписку на пользователя от пользователя с user_id. Требуется аутентификация.
 - `GET /user/:user_id/followers`: Получить подписчиков пользователя user_id.
-- `POST /post"`: Создать пост. Требуется аутентификация.
+- `POST /post`: Создать пост. Требуется аутентификация.
 - `GET /post/:post_id` Получить пост по post_id. Требуется аутентификация.
 - `PATCH /post/:post_id`: Изменить пост post_id. Требуется аутентификация.
 - `PUT /post/:post_id/like`: Поставить лайк на пост post_id. Требуется аутентификация.
-- `GET /post/:post_id/likes`: Получить лайки на посте post_id.
+- `GET /post/:post_id/likes`: Получить лайки на посте post_id.Требуется аутентификация.
 - `DELETE /post/:post_id/like`: Удалить лайк на посте post_id. Требуется аутентификация.
 - `DELETE /post/:post_id`: Удалить пост post_id. Требуется аутентификация.
 - `POST /post/:post_id/image`: Загрузить изображение в пост post_id. Требуется аутентификация.
-- `GET /post/:post_id/images`: Получить изображения поста post_id .
-- `GET /post/:post_id/thumbnails`: Получить миниатюры поста post_id ?
+- `GET /post/:post_id/images`: Получить изображения поста post_id.Требуется аутентификация.
+- `GET /post/:post_id/thumbnails`: Получить миниатюры поста post_id.Требуется аутентификация.

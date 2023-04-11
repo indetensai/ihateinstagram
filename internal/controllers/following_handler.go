@@ -13,8 +13,8 @@ type followingServiceHandler struct {
 
 func NewFollowingServiceHandler(app *fiber.App, f entities.FollowingService) {
 	handler := &followingServiceHandler{f}
-	app.Put("/user/:user_id<guid>/follow", handler.FollowHandler)
-	app.Delete("/user/:user_id<guid>/unfollow", handler.UnfollowHandler)
+	app.Post("/user/:user_id<guid>/follow", handler.FollowHandler)
+	app.Post("/user/:user_id<guid>/unfollow", handler.UnfollowHandler)
 	app.Get("/user/:user_id<guid>/followers", handler.GetFollowersHandler)
 }
 

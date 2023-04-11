@@ -14,7 +14,7 @@ func NewUserServiceHandler(app *fiber.App, u entities.UserService) {
 	handler := &userServiceHandler{u}
 	app.Post("/user/register", handler.RegisterHandler)
 	app.Post("/user/login", handler.LoginHandler)
-	app.Delete("/session/:id<guid>", handler.DeleteSessionHandler)
+	app.Delete("/session/:session_id<guid>", handler.DeleteSessionHandler)
 }
 
 func (u *userServiceHandler) RegisterHandler(c *fiber.Ctx) error {
@@ -46,7 +46,7 @@ func (u *userServiceHandler) LoginHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"session_id": session_id})
 }
 func (u *userServiceHandler) DeleteSessionHandler(c *fiber.Ctx) error {
-	session_id := c.FormValue("session_id")
+	session_id := c.Params("session_id")
 	err := u.UserService.DeleteSession(session_id, c.Context())
 	if err != nil {
 		return error_handling(c, err)

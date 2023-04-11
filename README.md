@@ -35,17 +35,17 @@ To run **IHATEINSTAGRAM**, follow these steps:
 The **IHATEINSTAGRAM** API has the following endpoints:
 - `POST /user/register`: Create a new user account.
 - `POST /user/login`: Login with an existing user account and get a session.
-- `DELETE /session/:id`: Delete a session.
-- `PUT /user/:user_id/follow`: Make user follow user_id user. Requires authentication.
-- `DELETE /user/:user_id/unfollow`: Unfollows the user from the user with user_id. Requires authentication.
+- `DELETE /session/:session_id`: Delete a session.
+- `POST /user/:user_id/follow`: Make user follow user_id user. Requires authentication.
+- `POST /user/:user_id/unfollow`: Unfollows the user from the user with user_id. Requires authentication.
 - `GET /user/:user_id/followers`:Get followers of the user_id user. 
-- `POST /post"`: Create a post. Requires authentication.
+- `POST /post`: Create a post. Requires authentication.
 - `GET /post/:post_id` Get a post by post_id. Requires authentication.
 - `PATCH /post/:post_id`: Change a post_id post. Requires authentication.
 - `PUT /post/:post_id/like`: Like a post_id post. Requires authentication.
-- `GET /post/:post_id/likes`: Get likes on a post_id post.
+- `GET /post/:post_id/likes`: Get likes on a post_id post. Requires authentication.
 - `DELETE /post/:post_id/like`: Delete a like on post_id post. Requires authentication.
 - `DELETE /post/:post_id`: Delete a post_id post. Requires authentication.
 - `POST /post/:post_id/image`: Upload an image in a post_id post. Requires authentication.
-- `GET /post/:post_id/images`: Get images of a post_id post .
-- `GET /post/:post_id/thumbnails`: Get thumbnails of a post_id post 
+- `GET /post/:post_id/images`: Get images of a post_id post. Requires authentication.
+- `GET /post/:post_id/thumbnails`: Get thumbnails of a post_id post. Requires authentication.
